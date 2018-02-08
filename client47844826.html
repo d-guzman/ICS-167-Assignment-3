@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>
+    ICS 167 - Pong
+</title>
+
+<style>
+canvas {
+    border: 5px solid #edb22a;
+    background-color: #ffd677;
+}
+h1 {
+    font-family: "Arial", Arial, sans-serif;
+}
+</style>
+
+</head>
+
+<body onload="startGame()">
+<script>
+var paddle1;
+
+function startGame () {
+    paddle1 = new component(90, 15, 255, 500, "#ff2d2d");
+    paddle2 = new component(90, 15, 255, 100, "#3542ff");
+    myGameArea.start();
+}
+
+function component (width, height, x, y, color) {
+    this.width = width;
+    this.height = height;
+    this.x = x;
+    this.y = y;
+    this.update = function(){
+        context = myGameArea.context;
+        context.fillStyle = color;
+        context.fillRect(this.x, this.y, this.width, this.height);
+    }
+}
+
+var myGameArea = {
+    canvas : document.createElement("canvas"),
+    title : document.createElement("h1"),
+    titleText : document.createTextNode("ICS 167 - PONG"),
+    start : function() {
+        this.canvas.width = 600;
+        this.canvas.height = 600;
+        this.title.appendChild(this.titleText);
+        this.context = this.canvas.getContext("2d");
+        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        document.body.insertBefore(this.title, this.canvas);
+        this.interval = setInterval(updateGameArea, 17);
+    },
+    clear : function() {
+        this.context.clearRect(0,0,this.canvas.width, this.canvas.height);
+    }
+}
+
+function updateGameArea(){  
+    myGameArea.clear();
+    paddle1.update();
+    paddle2.update();
+}
+
+</script>
+
+<!-- Start the HTML here. -->
+
+</body>
+</html>
