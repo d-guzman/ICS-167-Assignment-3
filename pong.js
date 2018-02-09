@@ -4,16 +4,16 @@ var animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame
 // callback at ~60 calls/s or 60fps
 
 
-var canvas = document.createElement('canvas');
+var canvas = document.createElement("canvas");
 var width = 700;
 var height = 700;
 canvas.width = width;
 canvas.height = height;
-var context = canvas.getContext('2d');
+var context = canvas.getContext("2d");
 
 var player =  new Player(300, 580, 100, 10);
 var ball = new Ball( 350, 350 );
-var score = 0; //// HELP
+var score = 0; 
 var keysDown = {};
 
 	
@@ -28,19 +28,21 @@ window.addEventListener("keydown", function(event){
 
 window.addEventListener("keyup", function(event) {
 	delete keysDown[event.keyCode];
-	player.paddle.move(0,0);
+	player.paddle.move(0,0); // if not moving, do not add previous speed to ball
 });
 
 var step = function(){
 	update();
 	render();
 	animate(step);
+	
 };
 
 //animating
 var update = function() {
 	player.update();
 	ball.update(player.paddle);
+	
 };
 
 // Play field
@@ -48,7 +50,8 @@ var render = function() {
 	context.fillStyle = "#262626";
 	context.fillRect( 100, 100, width-200, height-200 );
 	player.render();
-	ball.render();	
+	ball.render();
+	drawScore();
 };
 
 // Paddle(s)
@@ -158,6 +161,10 @@ Ball.prototype.update = function( paddle1 ){
 	    }
 	}
 };
+
+function drawScore(  ){
+	document.getElementById("score")	.innerHTML = "Score: <br/>" + score;
+}
 
 
 
