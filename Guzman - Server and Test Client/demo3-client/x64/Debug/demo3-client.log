@@ -1,0 +1,25 @@
+﻿  client.cpp
+c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(150): error C2065: 'ostringstream': undeclared identifier
+c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(150): error C2146: syntax error: missing ';' before identifier 'portstr'
+c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(150): error C2065: 'portstr': undeclared identifier
+c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(151): error C2065: 'portstr': undeclared identifier
+c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(152): error C2664: 'INT getaddrinfo(PCSTR,PCSTR,const ADDRINFOA *,PADDRINFOA *)': cannot convert argument 2 from 'int' to 'PCSTR'
+  c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(152): note: Conversion from integral type to pointer type requires reinterpret_cast, C-style cast or function-style cast
+c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(158): error C2065: 'hp': undeclared identifier
+c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(165): error C2228: left of '.sin_addr' must have class/struct/union
+  c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(165): note: type is 'addrinfo *'
+  c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(165): note: did you intend to use '->' instead?
+c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(165): error C2065: 'hp': undeclared identifier
+c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(165): error C2227: left of '->h_addr_list' must point to class/struct/union/generic type
+  c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(165): note: type is 'unknown-type'
+c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(165): error C2227: left of '->h_length' must point to class/struct/union/generic type
+  c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(165): note: type is 'unknown-type'
+c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(165): error C2660: 'memcpy': function does not take 1 arguments
+c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(173): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'SOCKET'
+  c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(173): note: consider using '%lld' in the format string
+  c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(173): note: consider using '%Id' in the format string
+  c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(173): note: consider using '%I64d' in the format string
+c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(182): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'SOCKET'
+  c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(182): note: consider using '%lld' in the format string
+  c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(182): note: consider using '%Id' in the format string
+  c:\users\guoxi\source\repos\ics167-socketdemonstration\demo3-client\client.cpp(182): note: consider using '%I64d' in the format string

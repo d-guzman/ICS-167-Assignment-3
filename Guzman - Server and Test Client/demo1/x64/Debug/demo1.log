@@ -1,0 +1,6 @@
+﻿  demo1.cpp
+c:\users\guoxi\source\repos\ics167-socketdemonstration\demo1\demo1.cpp(45): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'SOCKET'
+  c:\users\guoxi\source\repos\ics167-socketdemonstration\demo1\demo1.cpp(45): note: consider using '%lld' in the format string
+  c:\users\guoxi\source\repos\ics167-socketdemonstration\demo1\demo1.cpp(45): note: consider using '%Id' in the format string
+  c:\users\guoxi\source\repos\ics167-socketdemonstration\demo1\demo1.cpp(45): note: consider using '%I64d' in the format string
+  demo1.vcxproj -> C:\Users\Guoxi\Source\Repos\ICS167-SocketDemonstration\x64\Debug\demo1.exe
