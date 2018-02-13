@@ -3,17 +3,19 @@ var animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame
     };
 // callback at ~60 calls/s or 60fps
 
-// Render
-var canvas = document.createElement('canvas');
-var width = 500;
-var height = 500;
+
+var canvas = document.createElement("canvas");
+var width = 700;
+var height = 700;
 canvas.width = width;
 canvas.height = height;
-var context = canvas.getContext('2d');
+var context = canvas.getContext("2d");
 
-var playerbottom =  new Player();
-var ball = new Ball( 250, 250 );
+var player =  new Player(300, 580, 100, 10);
+var ball = new Ball( 350, 350 );
+var score = 0; 
 var keysDown = {};
+
 	
 window.onload = function() {
 	document.body.appendChild(canvas);
@@ -26,25 +28,30 @@ window.addEventListener("keydown", function(event){
 
 window.addEventListener("keyup", function(event) {
 	delete keysDown[event.keyCode];
+	player.paddle.move(0,0); // if not moving, do not add previous speed to ball
 });
 
 var step = function(){
 	update();
 	render();
 	animate(step);
-};
-//animating
-var update = function() {
-	playerbottom.update();
-	ball.update(playerbottom.paddle);
+	
 };
 
-//Background color
+//animating
+var update = function() {
+	player.update();
+	ball.update(player.paddle);
+	
+};
+
+// Play field
 var render = function() {
 	context.fillStyle = "#262626";
-	context.fillRect( 0, 0, width, height );
-	playerbottom.render();
+	context.fillRect( 100, 100, width-200, height-200 );
+	player.render();
 	ball.render();
+	drawScore();
 };
 
 // Paddle(s)
@@ -68,20 +75,19 @@ Paddle.prototype.move = function( x, y ){
 	this.x_speed = x;
 	this.y_speed = y;
 	
-	if (this.x < 0 ){ // paddle all the way to the left
-		this.x = 0;
+	if (this.x < 100 ){ // paddle all the way to the left
+		this.x = 100;
 		this.x_speed = 0;
 	}
-	else if ( this.x + this.width > 500) { // all the way to the right
-		this.x = 500 - this.width;
+	else if ( this.x + this.width > 600) { // all the way to the right
+		this.x = 600 - this.width;
 		this.x_speed = 0;
 	}
 }
 
-
-
-function Player(){
-	this.paddle = new Paddle( 200, 480, 100, 10 ); // bottom paddle
+// Player
+function Player(x, y, width, height){
+	this.paddle = new Paddle( x, y, width, height ); // bottom paddle
 }
 
 Player.prototype.render = function() { 
@@ -103,9 +109,7 @@ Player.prototype.update = function() {
 	}
 };
 
-
 //Ball
-
 function Ball( x, y ){
 	this.x = x;
 	this.y = y;
@@ -130,58 +134,37 @@ Ball.prototype.update = function( paddle1 ){
 	var bottom_x = this.x + 5;
 	var bottom_y = this.y + 5;
 	
-	if (this.x -5 < 0){ //hitting left wall
-		this.x = 5;
+	if (this.x - 5 < 100){ //hitting left wall
+		this.x = 105;
 		this.x_speed = -this.x_speed;
 	} 
-	else if ( this.x + 5 > 500 ) { // hitting right wall
-		this.x = 495;
+	else if ( this.x + 5 > 600 ) { // hitting right wall
+		this.x = 595;
 		this.x_speed = -this.x_speed;
 	}
-	else if  ( this.y - 5 < 0 ) { // hitting top wall
-		this.y = 5;
+	else if  ( this.y - 5 < 100 ) { // hitting top wall
+		this.y = 105;
 		this.y_speed = -this.y_speed;
 	}
-	else if (this.y + 5 > 500){ // hitting bottom wall
-		this.y = 495;
+	else if (this.y + 5 > 600){ // hitting bottom wall
+		this.y = 595;
 		this.y_speed = -this.y_speed;
+		score = 0;
 	}
-	if(top_y > 250) {
+	if(top_y > 300) {
 	    if(top_y < (paddle1.y + paddle1.height) && bottom_y > paddle1.y && top_x < (paddle1.x + paddle1.width) && bottom_x > paddle1.x) {
 	      // hit the player's paddle
-	      this.y_speed = -3;
-	      this.x_speed += (paddle1.x_speed / 2);
-	      this.y += this.y_speed;
+			this.y_speed = -3;
+		    this.x_speed += (paddle1.x_speed / 2);
+		    this.y += this.y_speed;
+			score++;
 	    }
 	}
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function drawScore(  ){
+	document.getElementById("score")	.innerHTML = "Score: <br/>" + score;
+}
 
 
 
