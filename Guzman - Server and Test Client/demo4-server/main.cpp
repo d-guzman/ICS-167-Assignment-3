@@ -46,7 +46,7 @@ struct pongPaddle {
 					x_Pos += x_Speed;
 				}
 			}
-			else if (message == "STILL") {
+			else if (message == "STOP") {
 				x_Speed = 0;
 			}
 		}
@@ -71,7 +71,7 @@ struct pongPaddle {
 					y_Pos += y_Speed;
 				}
 			}
-			else if (message == "STILL") {
+			else if (message == "STOP") {
 				y_Speed = 0;
 			}
 		}
@@ -80,7 +80,6 @@ struct pongPaddle {
 
 
 struct pongBall {
-	// needs physics added to it.
 	int x_Pos;
 	int y_Pos;
 	int radius;
