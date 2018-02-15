@@ -10,23 +10,147 @@ using namespace std;
 
 webSocket server;
 
+// DEFINE PONG VALUES HERE.
+struct pongPaddle {
+	// pongPaddle should be complete.
+	int x_Pos;
+	int y_Pos;
+	int width;
+	int height;
+	int x_Speed;
+	int y_Speed;
+	const char* orientation;
+	int score;
+
+	void updatePosition(string message) {
+		// There are only 2 ways a player can be oriented, make sure the orientations are only that.
+		if (orientation == "HORIZONTAL") {
+			// There are three messages a player can send: Positive Move (RIGHT and DOWN), Negative Move (LEFT and UP), and STILL.
+			if (message == "RIGHT") {
+				x_Speed = 4;
+				if ((x_Pos + width)+ x_Speed > 600) {
+					x_Speed = 0;
+					x_Pos = 600 - width;
+				}
+				else {
+					x_Pos += x_Speed;
+				}
+			}
+			else if (message == "LEFT"){
+				x_Speed = -4;
+				if (x_Pos + x_Speed < 100) {
+					x_Speed = 0;
+					x_Pos = 100;
+				}
+				else {
+					x_Pos += x_Speed;
+				}
+			}
+			else if (message == "STILL") {
+				x_Speed = 0;
+			}
+		}
+		else if (orientation == "VERTICAL") {
+			if (message == "UP") {
+				y_Speed = -4;
+				if (y_Pos + y_Speed < 100) {
+					y_Speed = 0;
+					y_Pos = 100;
+				}
+				else {
+					y_Pos += y_Speed;
+				}
+			}
+			else if (message == "DOWN"){
+				y_Speed = 4;
+				if ((y_Pos + height) + y_Speed > 600) {
+					y_Speed = 0;
+					y_Pos = 600 - height;
+				}
+				else {
+					y_Pos += y_Speed;
+				}
+			}
+			else if (message == "STILL") {
+				y_Speed = 0;
+			}
+		}
+	}
+};
+
+
+struct pongBall {
+	// needs physics added to it.
+	int x_Pos;
+	int y_Pos;
+	int radius;
+	int x_Speed;
+	int y_Speed;
+
+	void moveBall(pongPaddle& player) {
+		x_Pos += x_Speed;
+		y_Pos += y_Speed;
+		
+		int topX = x_Pos - 5;
+		int topY = y_Pos - 5;
+		int bottomX = x_Pos + 5;
+		int bottomY = y_Pos + 5;
+
+		if (bottomX > 600) {
+			x_Pos = 595;
+			x_Speed = -x_Speed;
+		}
+		else if (topX < 100) {
+			x_Pos = 105;
+			x_Speed = -x_Speed;
+		}
+		else if (bottomY > 600) {
+			y_Pos = 595;
+			y_Speed = -y_Speed;
+			player.score = 0;			// Hard coded the player score reset.
+		}
+		else if (topY < 100) {
+			y_Pos = 105;
+			y_Speed = -y_Speed;
+		}
+
+		if (topY < (player.y_Pos + player.height) && bottomY > player.y_Pos && topX < (player.x_Pos + player.width) && bottomX > player.x_Pos) {
+			y_Speed = -3;
+			x_Speed += (player.x_Speed / 2);
+			y_Pos += y_Speed;
+			player.score++;
+		}
+	}
+
+	void startGame() {
+		y_Speed = 3;
+	}
+};
+
+pongPaddle player1{ 300, 580, 100, 10, 0, 0, "HORIZONTAL", 0 };
+pongBall ball{350, 350, 6, 0, 0};
+
+// END DEFINES HERE.
+
 /* called when a client connects */
 void openHandler(int clientID){
     ostringstream os;
-    os << "Stranger " << clientID << " has joined.";
+    os << "Player " << clientID << " has joined the game.";
+
+	ball.startGame();
 
     vector<int> clientIDs = server.getClientIDs();
     for (int i = 0; i < clientIDs.size(); i++){
         if (clientIDs[i] != clientID)
             server.wsSend(clientIDs[i], os.str());
     }
-    server.wsSend(clientID, "Welcome!");
+    //server.wsSend(clientID, "Welcome!");
 }
 
 /* called when a client disconnects */
 void closeHandler(int clientID){
     ostringstream os;
-    os << "Stranger " << clientID << " has leaved.";
+    os << "Player " << clientID << " has left the game.";
 
     vector<int> clientIDs = server.getClientIDs();
     for (int i = 0; i < clientIDs.size(); i++){
@@ -37,37 +161,23 @@ void closeHandler(int clientID){
 
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message){
-    ostringstream os;
-    os << "Stranger " << clientID << " says: " << message;
+    //ostringstream os;
+    //os << "Stranger " << clientID << " says: " << message;
 
+	player1.updatePosition(message);
+
+	/*
     vector<int> clientIDs = server.getClientIDs();
     for (int i = 0; i < clientIDs.size(); i++){
         if (clientIDs[i] != clientID)
             server.wsSend(clientIDs[i], os.str());
     }
+	*/
+	
 }
 
 /* called once per select() loop */
-void periodicHandler(){
-    static time_t next = time(NULL) + 1;
-    time_t current = time(NULL);
-    if (current >= next){
-        ostringstream os;
-		//Deprecated ctime API in Windows 10
-		char timecstring[26];
-		ctime_s(timecstring, sizeof(timecstring), &current);
-		string timestring(timecstring);
-        timestring = timestring.substr(0, timestring.size() - 1);
-        os << timestring;
-
-        vector<int> clientIDs = server.getClientIDs();
-		for (int i = 0; i < clientIDs.size(); i++)
-			server.wsSend(clientIDs[i], os.str());
-
-		//cout << os.str().c_str() << endl;
-        next = time(NULL) + 1;
-    }
-	
+void periodicHandler(){	
 	// variable refresh is in nanoseconds instead of milliseconds because it was easier to make it work with
 	// my understanding of the Chrono library. The amount of nanoseconds in refresh will need to be changed 
 	//to accommodate the time spent on the calculating game state, resulting in ~60 packets getting sent to
@@ -77,8 +187,11 @@ void periodicHandler(){
 	chrono::steady_clock::time_point currentTime = chrono::steady_clock::now();
 
 	if (chrono::nanoseconds{currentTime-refreshTime}.count() >= refresh.count()) {
+		ball.moveBall(player1);
+
 		ostringstream os;
-		os << "I coded this next to some latino guy and a korean girl and they were overly affectionate and that was pretty uncomfortable to me like jesus fuck anywhere else please. Also this is a test string btw, if you are seeing this in the turned-in assignment, we (Diego) made an oopsie.";
+		os << ball.x_Pos << "|" << ball.y_Pos << "|" << player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score;
+
 		vector<int> clientIDs = server.getClientIDs();
 		for (int i = 0; i < clientIDs.size(); i++)
 			server.wsSend(clientIDs[i], os.str());
@@ -90,25 +203,12 @@ void periodicHandler(){
 
 int main(int argc, char *argv[]){
     int port = 8000;
-    
-	//chrono::milliseconds refresh{ chrono::seconds{1} };		//60 fps, or as near as makes no difference.
-	//cout << refresh.count() << endl;
-	
-	//auto refreshTime = chrono::steady_clock::now();
-	//cout << refreshTime.time_since_epoch().count()  << endl;
-	//cout << refreshTime.time_since_epoch().count() + refresh.count() << endl;
-	//cout << (refresh.count() == refreshTime.time_since_epoch().count()) << endl;
-	//auto currentTime = chrono::steady_clock::now();
-
-	//cout << chrono::nanoseconds{currentTime-refreshTime}.count() << endl;
 	
     /* set event handler */
     server.setOpenHandler(openHandler);
     server.setCloseHandler(closeHandler);
     server.setMessageHandler(messageHandler);
     server.setPeriodicHandler(periodicHandler);
-
-	
 
     /* start the chatroom server, listen to ip '127.0.0.1' and port '8000' */
     server.startServer(port);
