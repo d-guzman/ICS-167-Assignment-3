@@ -128,27 +128,37 @@ struct pongBall {
 
 pongPaddle player1{ 300, 650, 100, 10, 0, 0, "HORIZONTAL", 0 };
 pongBall ball{350, 350, 6, 0, 0};
-
+bool gameStarted = false;
 // END DEFINES HERE.
 
 /* called when a client connects */
 void openHandler(int clientID){
-    ostringstream os;
-    os << "Player " << clientID << " has joined the game.";
+	if (!gameStarted) {
+		gameStarted = true;
 
-	ball.startGame();
+		//ostringstream os;
+		//os << "Player " << clientID << " has joined the game.";
 
-    vector<int> clientIDs = server.getClientIDs();
-    for (int i = 0; i < clientIDs.size(); i++){
-        if (clientIDs[i] != clientID)
-            server.wsSend(clientIDs[i], os.str());
-    }
+		ball.startGame();
+
+		/*
+		vector<int> clientIDs = server.getClientIDs();
+		for (int i = 0; i < clientIDs.size(); i++) {
+			if (clientIDs[i] != clientID)
+				server.wsSend(clientIDs[i], os.str());
+		}
+		*/
+	}
+	else if (gameStarted) {
+		server.wsClose(clientID);
+	}
     //server.wsSend(clientID, "Welcome!");
 }
 
 /* called when a client disconnects */
 void closeHandler(int clientID){
-    ostringstream os;
+    /*
+	ostringstream os;
     os << "Player " << clientID << " has left the game.";
 
     vector<int> clientIDs = server.getClientIDs();
@@ -156,6 +166,7 @@ void closeHandler(int clientID){
         if (clientIDs[i] != clientID)
             server.wsSend(clientIDs[i], os.str());
     }
+	*/
 }
 
 /* called when a client sends a message to the server */
