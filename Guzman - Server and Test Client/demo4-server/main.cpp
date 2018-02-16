@@ -28,9 +28,9 @@ struct pongPaddle {
 			// There are three messages a player can send: Positive Move (RIGHT and DOWN), Negative Move (LEFT and UP), and STILL.
 			if (message == "RIGHT") {
 				x_Speed = 4;
-				if ((x_Pos + width)+ x_Speed > 600) {
+				if ((x_Pos + width)+ x_Speed > 700) {
 					x_Speed = 0;
-					x_Pos = 600 - width;
+					x_Pos = 700 - width;
 				}
 				else {
 					x_Pos += x_Speed;
@@ -38,9 +38,9 @@ struct pongPaddle {
 			}
 			else if (message == "LEFT"){
 				x_Speed = -4;
-				if (x_Pos + x_Speed < 100) {
+				if (x_Pos + x_Speed < 0) {
 					x_Speed = 0;
-					x_Pos = 100;
+					x_Pos = 0;
 				}
 				else {
 					x_Pos += x_Speed;
@@ -53,9 +53,9 @@ struct pongPaddle {
 		else if (orientation == "VERTICAL") {
 			if (message == "UP") {
 				y_Speed = -4;
-				if (y_Pos + y_Speed < 100) {
+				if (y_Pos + y_Speed < 0) {
 					y_Speed = 0;
-					y_Pos = 100;
+					y_Pos = 0;
 				}
 				else {
 					y_Pos += y_Speed;
@@ -63,9 +63,9 @@ struct pongPaddle {
 			}
 			else if (message == "DOWN"){
 				y_Speed = 4;
-				if ((y_Pos + height) + y_Speed > 600) {
+				if ((y_Pos + height) + y_Speed > 700) {
 					y_Speed = 0;
-					y_Pos = 600 - height;
+					y_Pos = 700 - height;
 				}
 				else {
 					y_Pos += y_Speed;
@@ -95,21 +95,21 @@ struct pongBall {
 		int bottomX = x_Pos + 5;
 		int bottomY = y_Pos + 5;
 
-		if (bottomX > 600) {
-			x_Pos = 595;
+		if (bottomX > 700) {
+			x_Pos = 695;
 			x_Speed = -x_Speed;
 		}
-		else if (topX < 100) {
-			x_Pos = 105;
+		else if (topX < 0) {
+			x_Pos = 5;
 			x_Speed = -x_Speed;
 		}
-		else if (bottomY > 600) {
-			y_Pos = 595;
+		else if (bottomY > 700) {
+			y_Pos = 695;
 			y_Speed = -y_Speed;
 			player.score = 0;			// Hard coded the player score reset.
 		}
-		else if (topY < 100) {
-			y_Pos = 105;
+		else if (topY < 0) {
+			y_Pos = 5;
 			y_Speed = -y_Speed;
 		}
 
@@ -126,7 +126,7 @@ struct pongBall {
 	}
 };
 
-pongPaddle player1{ 300, 580, 100, 10, 0, 0, "HORIZONTAL", 0 };
+pongPaddle player1{ 300, 650, 100, 10, 0, 0, "HORIZONTAL", 0 };
 pongBall ball{350, 350, 6, 0, 0};
 
 // END DEFINES HERE.

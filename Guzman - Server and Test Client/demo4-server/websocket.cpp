@@ -641,19 +641,19 @@ int webSocket::wsGetNextClientID(){
 }
 
 void webSocket::wsAddClient(int socket, in_addr ip){
-    FD_SET(socket, &fds);
-    if (socket > fdmax)
-        fdmax = socket;
+		FD_SET(socket, &fds);
+		if (socket > fdmax)
+			fdmax = socket;
 
-    int clientID = wsGetNextClientID();
-    wsClient *newClient = new wsClient(socket, ip);
-    if (clientID >= wsClients.size()){
-        wsClients.push_back(newClient);
-    }
-    else {
-        wsClients[clientID] = newClient;
-    }
-    socketIDmap[socket] = clientID;
+		int clientID = wsGetNextClientID();
+		wsClient *newClient = new wsClient(socket, ip);
+		if (clientID >= wsClients.size()) {
+			wsClients.push_back(newClient);
+		}
+		else {
+			wsClients[clientID] = newClient;
+		}
+		socketIDmap[socket] = clientID;
 }
 
 void webSocket::setOpenHandler(defaultCallback callback){

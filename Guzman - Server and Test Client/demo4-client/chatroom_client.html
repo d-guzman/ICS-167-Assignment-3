@@ -8,20 +8,93 @@
         #ip {line-height:20px}
         #port {line-height:20px}
 		#body {max-width:800px;margin:auto}
-		#log {width:100%;height:400px}
-		#message {width:100%;line-height:20px}
+
+
+		canvas {
+			border: 5px solid #d19f51;
+			background-color: #ffc466;
+		}
 	</style>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 	<script src="fancywebsocket.js"></script>
 	<script>
 		var Server;
+		var gameStateData;
+		//var keysDown = {};
+		// Pong stuff goes in here.
+		window.addEventListener("keydown", function(event){
+			//keysDown[event.keyCode] = true;
+			if(Number(event.keyCode) == 37){
+				Server.send('message', "LEFT");
+			}
+			else if(Number(event.keyCode) == 39){
+				Server.send('message', "RIGHT");
+			}
+		});
+		
+		window.addEventListener("keyup", function(event) {
+			//delete keysDown[event.keyCode];
+			Server.send('message', "STOP");
+		});
+		
+		function startGame(){
+			gameArea.start();
+			player1 = new component(300,650, "#f94d4d", 100, 10, "rectangle");
+			ball = new component(350,350,"#ffffff", 0,0, "circle");
+		}
+		var gameArea = {
+			canvas : document.createElement("canvas"),
+			start : function () {
+				this.canvas.width = 700;
+				this.canvas.height = 700;
+				this.context = this.canvas.getContext("2d");
+				document.body.appendChild(this.canvas);
+				this.interval = setInterval(updateGameArea, 20);
+			},
+			clear : function() {
+				this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+			}
+		}
+		
+		function component(x, y, color, width, height, shape) {
+			this.x = x;
+			this.y = y; 
+			this.width = width;
+			this.height = height;
+			this.shape = shape;
+			this.update = function(){
+				if(this.shape == "rectangle"){
+					ctx = gameArea.context;
+					ctx.fillStyle = color;
+					ctx.fillRect(this.x, this.y, this.width, this.height);
+				}
+				else if(this.shape == "circle"){
+					ctx = gameArea.context;
+					ctx.beginPath();
+					ctx.arc( this.x, this.y, 6, 2 * Math.PI, false );
+					ctx.fillStyle = color;
+					ctx.fill();
+				}
+			};
+			this.setPosition = function(x,y){
+				this.x = x;
+				this.y = y;
+			};
+		}
+		
+		function updateGameArea(){
+			gameArea.clear();
+			ball.update();
+			player1.update();
+		}
+		// end pong zone
 
 		function log( text ) {
-			$log = $('#log');
-			//Add text to log
-			$log.append(($log.val()?"\n":'')+text);
-			//Autoscroll
-			$log[0].scrollTop = $log[0].scrollHeight - $log[0].clientHeight;
+			gameStateData = text.split('|');
+			ball.setPosition(gameStateData[0], gameStateData[1]);
+			player1.setPosition(gameStateData[2], gameStateData[3]);
+			var player1Score = document.getElementById('score');
+			player1Score.textContent = document.getElementById('name').value +" Score: " + gameStateData[4];
 		}
 
 		function send( text ) {
@@ -64,14 +137,17 @@
 	</script>
 </head>
 
-<body>
+<body onload="startGame()">
 	<div id='body'>
         Server ip: <input type='text' id='ip' name='ip'>
         Server port: <input type='text' id='port' name='port'>
+		Player Name: <input type='text' id='name' name='user name'>
         <button type="button" id='cntBtn' onclick="connect();">Connect</button>
-		<textarea id='log' name='log' readonly='readonly'></textarea><br/>
-		<input type='text' id='message' name='message' />
+		<!--<textarea id='log' name='log' readonly='readonly'></textarea><br/>-->
+		<!--<input type='text' id='message' name='message' />-->
 	</div>
+	
+	<p id="score">Player 1 Score: </p>
 </body>
 
 </html>
