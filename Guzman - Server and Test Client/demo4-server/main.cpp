@@ -94,8 +94,9 @@ struct pongBall {
 	int radius;
 	int x_Speed;
 	int y_Speed;
+	pongPaddle** players;
 
-	void moveBall(pongPaddle& player) {
+	void moveBall() {
 		x_Pos += x_Speed;
 		y_Pos += y_Speed;
 		
@@ -104,29 +105,51 @@ struct pongBall {
 		int bottomX = x_Pos + 5;
 		int bottomY = y_Pos + 5;
 
-		if (bottomX > 700) {
+		if (bottomX > 700) {			//Player 4
 			x_Pos = 695;
 			x_Speed = -x_Speed;
+			players[3]->score = 0;
 		}
-		else if (topX < 0) {
+		else if (topX < 0) {			// Player 3
 			x_Pos = 5;
 			x_Speed = -x_Speed;
+			players[2]->score = 0;
 		}
-		else if (bottomY > 700) {
+		else if (bottomY > 700) {		// Player 1
 			y_Pos = 695;
 			y_Speed = -y_Speed;
-			player.score = 0;			// Hard coded the player score reset.
+			players[0]->score = 0;		
 		}
-		else if (topY < 0) {
+		else if (topY < 0) {			// Player 2
 			y_Pos = 5;
 			y_Speed = -y_Speed;
+			players[1]->score = 0;
 		}
 
-		if (topY < (player.y_Pos + player.height) && bottomY > player.y_Pos && topX < (player.x_Pos + player.width) && bottomX > player.x_Pos) {
-			y_Speed = -3;
-			x_Speed += (player.x_Speed / 2);
-			y_Pos += y_Speed;
-			player.score++;
+		//if (topY < (player.y_Pos + player.height) && bottomY > player.y_Pos && topX < (player.x_Pos + player.width) && bottomX > player.x_Pos) {
+		//	y_Speed = -3;
+		//	x_Speed += (player.x_Speed / 2);
+		//	y_Pos += y_Speed;
+		//	player.score++;
+		//}
+		for (int i = 0; i < 4; i++) {
+			if (topY < (players[i]->y_Pos + players[i]->height) && bottomY > players[i]->y_Pos && topX < (players[i]->x_Pos + players[i]->width) && bottomX > players[i]->x_Pos) {
+				//y_Speed = -(y_Speed);
+				//x_Speed = -x_Speed;
+				if (players[i]->orientation == "HORIZONTAL") {
+					x_Speed += int (players[i]->x_Speed / 2);
+					y_Speed = y_Speed * -1;
+				}
+				if (players[i]->orientation == "VERTICAL") {
+					x_Speed = x_Speed * -1;
+					y_Speed += int(players[i]->y_Speed / 2);
+				}
+				//Need to change the balls speed when it hits the paddle based on which paddle hit it.
+				// Do this with 4 if/else if blocks. 0-3 in the players array is players 1-4, respectively.
+
+
+				players[i]->score++;
+			}
 		}
 	}
 
@@ -143,23 +166,23 @@ struct pongBall {
 };
 string defaultName = "NoPlayer";
 
-pongPaddle player1{ 300, 650, 100, 10, 0, 0, "HORIZONTAL", 0, defaultName };
-pongPaddle player2{ 300, 50, 100, 10, 0, 0, "HORIZONTAL", 0, defaultName };
-pongPaddle player3{ 50, 300, 10, 100, 0, 0, "VERTICAL", 0, defaultName };
-pongPaddle player4{ 650, 300, 10, 100, 0, 0, "VERTICAL", 0, defaultName };
+pongPaddle player1{ 300, 685, 100, 10, 0, 0, "HORIZONTAL", 0, defaultName };
+pongPaddle player2{ 300, 5, 100, 10, 0, 0, "HORIZONTAL", 0, defaultName };
+pongPaddle player3{ 5, 300, 10, 100, 0, 0, "VERTICAL", 0, defaultName };
+pongPaddle player4{ 685, 300, 10, 100, 0, 0, "VERTICAL", 0, defaultName };
 
 pongPaddle* players[4] = { &player1, &player2, &player3, &player4 };
 int playersConnected = 0;
 
-pongBall ball{ 350, 350, 6, 0, 0 };
+pongBall ball{ 350, 350, 6, 0, 0, players};
 bool gameStarted = false;
 // END DEFINES HERE.
 
 /* called when a client connects */
 void openHandler(int clientID){
-	//gameStarted = true;
-	//playersConnected++;
-	//ball.startGame();
+	if (playersConnected == 4) {
+		server.wsClose(clientID);
+	}
 
 	for (int i = 0; i < 4; i++) {
 		if (players[i]->clientID == 9999) {
@@ -169,8 +192,8 @@ void openHandler(int clientID){
 			break;
 		}
 	}
-	cout << playersConnected << endl;
-	if (playersConnected == 1) {
+	cout << "Players on Server: " << playersConnected << endl;
+	if (playersConnected == 4) {
 		ball.startGame();
 	}
 }
@@ -183,36 +206,25 @@ void closeHandler(int clientID){
 			players[i]->updatePlayerName(defaultName);
 			playersConnected--;
 			cout << "Player with ClientID " << clientID << " has left. Players left: " << playersConnected << endl;
+			break;
 		}
 	}
-    /*
-	ostringstream os;
-    os << "Player " << clientID << " has left the game.";
 
-    vector<int> clientIDs = server.getClientIDs();
-    for (int i = 0; i < clientIDs.size(); i++){
-        if (clientIDs[i] != clientID)
-            server.wsSend(clientIDs[i], os.str());
-    }
-	*/
+	if (playersConnected < 4) {
+		ball.stopGame();
+	}
 }
 
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message){
     //ostringstream os;
-    //os << "Stranger " << clientID << " says: " << message;
-
-	//Check the message. If 'RIGHT', 'LEFT', ''
-	player1.updatePosition(message);
-
-	/*
-    vector<int> clientIDs = server.getClientIDs();
-    for (int i = 0; i < clientIDs.size(); i++){
-        if (clientIDs[i] != clientID)
-            server.wsSend(clientIDs[i], os.str());
-    }
-	*/
-	
+	for (int i = 0; i < 4; i++) {
+		if (players[i]->clientID == clientID) {
+			players[i]->updatePosition(message);
+			break;
+		}
+	}
+	//player1.updatePosition(message);
 }
 
 /* called once per select() loop */
@@ -226,10 +238,14 @@ void periodicHandler(){
 	chrono::steady_clock::time_point currentTime = chrono::steady_clock::now();
 
 	if (chrono::nanoseconds{currentTime-refreshTime}.count() >= refresh.count()) {
-		ball.moveBall(player1);
+		ball.moveBall();
 
 		ostringstream os;
-		os << ball.x_Pos << "|" << ball.y_Pos << "|" << player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName;
+		os << ball.x_Pos << "|" << ball.y_Pos << "|" \
+			<< player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName << '|' \
+			<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
+			<< player3.x_Pos << '|' << player3.y_Pos << '|' << player3.score << '|' << player3.playerName << '|' \
+			<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName;
 
 		vector<int> clientIDs = server.getClientIDs();
 		for (int i = 0; i < clientIDs.size(); i++)

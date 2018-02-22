@@ -11,8 +11,8 @@
 
 
 		canvas {
-			border: 5px solid #d19f51;
-			background-color: #ffc466;
+			border: 5px solid #000000;
+			background-color: #262626;
 		}
 	</style>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -29,6 +29,13 @@
 			}
 			else if(Number(event.keyCode) == 39){
 				Server.send('message', "RIGHT");
+			}
+			else if(Number(event.keyCode) == 38){
+				Server.send('message', "UP");
+			}
+			
+			else if(Number(event.keyCode) == 40){
+				Server.send('message', "DOWN");
 			}
 			//Add checks for the UP and DOWN keys, and send the strings 'UP' and 'DOWN' respectively
 		});
@@ -103,6 +110,9 @@
 			player1.setPosition(gameStateData[2], gameStateData[3]);
 			var player1Score = document.getElementById('score');
 			player1Score.textContent = document.getElementById('name').value +" Score: " + gameStateData[4];
+			player2.setPosition(gameStateData[6], gameStateData[7]);
+			player3.setPosition(gameStateData[10], gameStateData[11]);
+			player4.setPosition(gameStateData[14], gameStateData[15]);
 		}
 
 		function send( text ) {
@@ -113,7 +123,6 @@
             log('Connecting...');
 			Server = new FancyWebSocket('ws://' + document.getElementById('ip').value + ':' + document.getElementById('port').value);
 			
-			document.getElementById("cntBtn").disabled = true;
 			
 			$('#message').keypress(function(e) {
 				if ( e.keyCode == 13 && this.value ) {
@@ -126,7 +135,7 @@
 
 			//Let the user know we're connected
 			Server.bind('open', function() {
-                //document.getElementById("cntBtn").disabled = true;
+                document.getElementById("cntBtn").disabled = true;
 				log( "Connected." );
 			});
 
