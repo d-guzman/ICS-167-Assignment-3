@@ -108,10 +108,13 @@
 			gameStateData = text.split('|');
 			ball.setPosition(gameStateData[0], gameStateData[1]);
 			player1.setPosition(gameStateData[2], gameStateData[3]);
-			var player1Score = document.getElementById('score');
-			player1Score.textContent = document.getElementById('name').value +" Score: " + gameStateData[4];
+			var playerScores = document.getElementById('scores');
+			playerScores.textContent = gameStateData[5] +" Score: " + gameStateData[4] + " | " + gameStateData[9] +" Score: " + gameStateData[8] + " | " + gameStateData[13] +" Score: " + gameStateData[12] + " | " + gameStateData[17] +" Score: " + gameStateData[16];
+			
 			player2.setPosition(gameStateData[6], gameStateData[7]);
+			
 			player3.setPosition(gameStateData[10], gameStateData[11]);
+			
 			player4.setPosition(gameStateData[14], gameStateData[15]);
 		}
 
@@ -136,7 +139,8 @@
 			//Let the user know we're connected
 			Server.bind('open', function() {
                 document.getElementById("cntBtn").disabled = true;
-				log( "Connected." );
+				var playerName = 'N' + document.getElementById('name').value;
+				Server.send('message', playerName);
 			});
 
 			//OH NOES! Disconnection occurred.
@@ -167,7 +171,7 @@
 		<!--<input type='text' id='message' name='message' />-->
 	</div>
 	
-	<p id="score">Player 1 Score: </p>
+	<p id="scores"> Player 1 Score: 0 | Player 2 Score: 0 | Player 3 Score: 0 | Player 4 Score: 0 </p>
 </body>
 
 </html>

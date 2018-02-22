@@ -20,7 +20,8 @@ struct pongPaddle {
 	int y_Speed;
 	const char* orientation;
 	int score;
-
+	const int defaultX_Pos;
+	const int defaultY_Pos;
 	string playerName;
 	int clientID = 9999;
 
@@ -29,6 +30,13 @@ struct pongPaddle {
 	}
 	void updateClientID(int cID) {
 		clientID = cID;
+	}
+	void resetPlayer() {
+		score = 0;
+		x_Pos = defaultX_Pos;
+		y_Pos = defaultY_Pos;
+		x_Speed = 0;
+		y_Speed = 0;
 	}
 
 	void updatePosition(string message) {
@@ -162,14 +170,18 @@ struct pongBall {
 		y_Speed = 0;
 		x_Pos = 350;
 		y_Pos = 350;
+
+		for (int i = 0; i < 4; i++) {
+			players[i]->resetPlayer();
+		}
 	}
 };
 string defaultName = "NoPlayer";
 
-pongPaddle player1{ 300, 685, 100, 10, 0, 0, "HORIZONTAL", 0, defaultName };
-pongPaddle player2{ 300, 5, 100, 10, 0, 0, "HORIZONTAL", 0, defaultName };
-pongPaddle player3{ 5, 300, 10, 100, 0, 0, "VERTICAL", 0, defaultName };
-pongPaddle player4{ 685, 300, 10, 100, 0, 0, "VERTICAL", 0, defaultName };
+pongPaddle player1{ 300, 685, 100, 10, 0, 0, "HORIZONTAL", 0, 300, 685, defaultName };
+pongPaddle player2{ 300, 5, 100, 10, 0, 0, "HORIZONTAL", 0, 300, 5, defaultName };
+pongPaddle player3{ 5, 300, 10, 100, 0, 0, "VERTICAL", 0, 5, 300, defaultName };
+pongPaddle player4{ 685, 300, 10, 100, 0, 0, "VERTICAL", 0, 685, 300, defaultName };
 
 pongPaddle* players[4] = { &player1, &player2, &player3, &player4 };
 int playersConnected = 0;
@@ -193,9 +205,11 @@ void openHandler(int clientID){
 		}
 	}
 	cout << "Players on Server: " << playersConnected << endl;
-	if (playersConnected == 4) {
+	if (playersConnected == 4 && !gameStarted) {
+		gameStarted = true;
 		ball.startGame();
 	}
+
 }
 
 /* called when a client disconnects */
@@ -211,20 +225,26 @@ void closeHandler(int clientID){
 	}
 
 	if (playersConnected < 4) {
+		gameStarted = false;
 		ball.stopGame();
 	}
 }
 
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message){
-    //ostringstream os;
 	for (int i = 0; i < 4; i++) {
 		if (players[i]->clientID == clientID) {
-			players[i]->updatePosition(message);
-			break;
+			if (message[0] == 'N') {
+
+				players[i]->updatePlayerName(message.substr(1));
+				break;
+			}
+			else {
+				players[i]->updatePosition(message);
+				break;
+			}
 		}
 	}
-	//player1.updatePosition(message);
 }
 
 /* called once per select() loop */
