@@ -12,7 +12,6 @@ webSocket server;
 
 // DEFINE PONG VALUES HERE.
 struct pongPaddle {
-	// pongPaddle should be complete.
 	int x_Pos;
 	int y_Pos;
 	int width;
@@ -21,6 +20,16 @@ struct pongPaddle {
 	int y_Speed;
 	const char* orientation;
 	int score;
+
+	string playerName;
+	int clientID = 9999;
+
+	void updatePlayerName(string pName) {
+		playerName = pName;
+	}
+	void updateClientID(int cID) {
+		clientID = cID;
+	}
 
 	void updatePosition(string message) {
 		// There are only 2 ways a player can be oriented, make sure the orientations are only that.
@@ -124,39 +133,58 @@ struct pongBall {
 	void startGame() {
 		y_Speed = 3;
 	}
-};
 
-pongPaddle player1{ 300, 650, 100, 10, 0, 0, "HORIZONTAL", 0 };
-pongBall ball{350, 350, 6, 0, 0};
+	void stopGame() {
+		x_Speed = 0;
+		y_Speed = 0;
+		x_Pos = 350;
+		y_Pos = 350;
+	}
+};
+string defaultName = "NoPlayer";
+
+pongPaddle player1{ 300, 650, 100, 10, 0, 0, "HORIZONTAL", 0, defaultName };
+pongPaddle player2{ 300, 50, 100, 10, 0, 0, "HORIZONTAL", 0, defaultName };
+pongPaddle player3{ 50, 300, 10, 100, 0, 0, "VERTICAL", 0, defaultName };
+pongPaddle player4{ 650, 300, 10, 100, 0, 0, "VERTICAL", 0, defaultName };
+
+pongPaddle* players[4] = { &player1, &player2, &player3, &player4 };
+int playersConnected = 0;
+
+pongBall ball{ 350, 350, 6, 0, 0 };
 bool gameStarted = false;
 // END DEFINES HERE.
 
 /* called when a client connects */
 void openHandler(int clientID){
-	if (!gameStarted) {
-		gameStarted = true;
+	//gameStarted = true;
+	//playersConnected++;
+	//ball.startGame();
 
-		//ostringstream os;
-		//os << "Player " << clientID << " has joined the game.";
-
-		ball.startGame();
-
-		/*
-		vector<int> clientIDs = server.getClientIDs();
-		for (int i = 0; i < clientIDs.size(); i++) {
-			if (clientIDs[i] != clientID)
-				server.wsSend(clientIDs[i], os.str());
+	for (int i = 0; i < 4; i++) {
+		if (players[i]->clientID == 9999) {
+			cout << "Player " << i+1 << " has joined. Client ID: " << clientID << endl;
+			players[i]->updateClientID(clientID);
+			playersConnected++;
+			break;
 		}
-		*/
 	}
-	else if (gameStarted) {
-		server.wsClose(clientID);
+	cout << playersConnected << endl;
+	if (playersConnected == 1) {
+		ball.startGame();
 	}
-    //server.wsSend(clientID, "Welcome!");
 }
 
 /* called when a client disconnects */
 void closeHandler(int clientID){
+	for (int i = 0; i < 4; i++) {
+		if (players[i]->clientID == clientID) {
+			players[i]->updateClientID(9999);
+			players[i]->updatePlayerName(defaultName);
+			playersConnected--;
+			cout << "Player with ClientID " << clientID << " has left. Players left: " << playersConnected << endl;
+		}
+	}
     /*
 	ostringstream os;
     os << "Player " << clientID << " has left the game.";
@@ -174,6 +202,7 @@ void messageHandler(int clientID, string message){
     //ostringstream os;
     //os << "Stranger " << clientID << " says: " << message;
 
+	//Check the message. If 'RIGHT', 'LEFT', ''
 	player1.updatePosition(message);
 
 	/*
@@ -200,7 +229,7 @@ void periodicHandler(){
 		ball.moveBall(player1);
 
 		ostringstream os;
-		os << ball.x_Pos << "|" << ball.y_Pos << "|" << player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score;
+		os << ball.x_Pos << "|" << ball.y_Pos << "|" << player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName;
 
 		vector<int> clientIDs = server.getClientIDs();
 		for (int i = 0; i < clientIDs.size(); i++)

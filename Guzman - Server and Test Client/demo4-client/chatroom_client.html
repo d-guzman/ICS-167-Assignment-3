@@ -30,6 +30,7 @@
 			else if(Number(event.keyCode) == 39){
 				Server.send('message', "RIGHT");
 			}
+			//Add checks for the UP and DOWN keys, and send the strings 'UP' and 'DOWN' respectively
 		});
 		
 		window.addEventListener("keyup", function(event) {
@@ -40,6 +41,10 @@
 		function startGame(){
 			gameArea.start();
 			player1 = new component(300,650, "#f94d4d", 100, 10, "rectangle");
+			player2 = new component(300,50, "#1d68e0", 100, 10, "rectangle");
+			player3 = new component(50,300, "#1ce037", 10, 100, "rectangle");
+			player4 = new component(650,300, "#fff726", 10, 100, "rectangle");
+			// Add new paddle components here.
 			ball = new component(350,350,"#ffffff", 0,0, "circle");
 		}
 		var gameArea = {
@@ -86,6 +91,9 @@
 			gameArea.clear();
 			ball.update();
 			player1.update();
+			player2.update();
+			player3.update();
+			player4.update();
 		}
 		// end pong zone
 
@@ -104,7 +112,9 @@
         function connect(){
             log('Connecting...');
 			Server = new FancyWebSocket('ws://' + document.getElementById('ip').value + ':' + document.getElementById('port').value);
-
+			
+			document.getElementById("cntBtn").disabled = true;
+			
 			$('#message').keypress(function(e) {
 				if ( e.keyCode == 13 && this.value ) {
 					log( 'You: ' + this.value );
@@ -116,7 +126,7 @@
 
 			//Let the user know we're connected
 			Server.bind('open', function() {
-                document.getElementById("cntBtn").disabled = true;
+                //document.getElementById("cntBtn").disabled = true;
 				log( "Connected." );
 			});
 
@@ -132,6 +142,7 @@
 			});
 
 			Server.connect();
+			// Send the player name after connecting.
         }
 
 	</script>
