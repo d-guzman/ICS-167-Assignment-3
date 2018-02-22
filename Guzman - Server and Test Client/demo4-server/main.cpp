@@ -103,6 +103,7 @@ struct pongBall {
 	int x_Speed;
 	int y_Speed;
 	pongPaddle** players;
+	int indexOfPlayer = 4;
 
 	void moveBall() {
 		x_Pos += x_Speed;
@@ -116,22 +117,26 @@ struct pongBall {
 		if (bottomX > 700) {			//Player 4
 			x_Pos = 695;
 			x_Speed = -x_Speed;
-			players[3]->score = 0;
+			//players[3]->score = 0;
+			givePoint();
 		}
 		else if (topX < 0) {			// Player 3
 			x_Pos = 5;
 			x_Speed = -x_Speed;
-			players[2]->score = 0;
+			//players[2]->score = 0;
+			givePoint();
 		}
 		else if (bottomY > 700) {		// Player 1
 			y_Pos = 695;
 			y_Speed = -y_Speed;
-			players[0]->score = 0;		
+			//players[0]->score = 0;		
+			givePoint();
 		}
 		else if (topY < 0) {			// Player 2
 			y_Pos = 5;
 			y_Speed = -y_Speed;
-			players[1]->score = 0;
+			//players[1]->score = 0;
+			givePoint();
 		}
 
 		//if (topY < (player.y_Pos + player.height) && bottomY > player.y_Pos && topX < (player.x_Pos + player.width) && bottomX > player.x_Pos) {
@@ -142,8 +147,6 @@ struct pongBall {
 		//}
 		for (int i = 0; i < 4; i++) {
 			if (topY < (players[i]->y_Pos + players[i]->height) && bottomY > players[i]->y_Pos && topX < (players[i]->x_Pos + players[i]->width) && bottomX > players[i]->x_Pos) {
-				//y_Speed = -(y_Speed);
-				//x_Speed = -x_Speed;
 				if (players[i]->orientation == "HORIZONTAL") {
 					x_Speed += int (players[i]->x_Speed / 2);
 					y_Speed = y_Speed * -1;
@@ -152,11 +155,8 @@ struct pongBall {
 					x_Speed = x_Speed * -1;
 					y_Speed += int(players[i]->y_Speed / 2);
 				}
-				//Need to change the balls speed when it hits the paddle based on which paddle hit it.
-				// Do this with 4 if/else if blocks. 0-3 in the players array is players 1-4, respectively.
-
-
-				players[i]->score++;
+				//players[i]->score++;
+				indexOfPlayer = i;
 			}
 		}
 	}
@@ -174,6 +174,31 @@ struct pongBall {
 		for (int i = 0; i < 4; i++) {
 			players[i]->resetPlayer();
 		}
+	}
+
+	void givePoint() {
+		if (indexOfPlayer != 4) {
+			players[indexOfPlayer]->score++;
+		}
+		x_Pos = 350;
+		y_Pos = 350;
+		if (indexOfPlayer == 0) {
+			x_Speed = 3;
+			y_Speed = 0;
+		}
+		else if (indexOfPlayer == 1) {
+			x_Speed = -3;
+			y_Speed = 0;
+		}
+		else if (indexOfPlayer == 2) {
+			x_Speed = 0;
+			y_Speed = 3;
+		}
+		else if (indexOfPlayer == 3) {
+			x_Speed = 0;
+			y_Speed = -3;
+		}
+		indexOfPlayer = 4;
 	}
 };
 string defaultName = "NoPlayer";
