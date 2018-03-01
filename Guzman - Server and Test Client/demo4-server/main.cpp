@@ -213,7 +213,10 @@ bool useRandomLatency = false;
 default_random_engine generator;
 uniform_int_distribution<int> dist(35, 340);
 
-bool useIncrementalLatency = false;
+bool useIncrementalLatency = true;
+int latency = 20;
+int latencyAcc = 10;
+int latencyMax = 400;
 
 // END DEFINES HERE.
 
@@ -228,6 +231,17 @@ void openHandler(int clientID) {
 			cout << "Player " << i + 1 << " has joined. Client ID: " << clientID << endl;
 			players[i]->updateClientID(clientID);
 			playersConnected++;
+
+			ostringstream os;
+			os << ball.x_Pos << "|" << ball.y_Pos << "|" \
+				<< player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName << '|' \
+				<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
+				<< player3.x_Pos << '|' << player3.y_Pos << '|' << player3.score << '|' << player3.playerName << '|' \
+				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName;
+			string serverMessage = os.str();
+
+			server.wsSend(clientID,serverMessage);
+
 			break;
 		}
 	}
@@ -284,7 +298,7 @@ void periodicHandler() {
 	chrono::duration<double, std::milli> time_span = t2 - t1;
 
 	if (!useFixedLatency && !useRandomLatency && !useIncrementalLatency) {
-		if (time_span.count() >= frame.count()) {
+		if (time_span.count() >= frame.count() && gameStarted) {
 			ostringstream os;
 			os << ball.x_Pos << "|" << ball.y_Pos << "|" \
 				<< player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName << '|' \
@@ -301,7 +315,7 @@ void periodicHandler() {
 		}
 	}
 	else if (useFixedLatency) {
-		if (time_span.count() >= frame.count() * latencyScalar) {
+		if (time_span.count() >= frame.count() * latencyScalar && gameStarted) {
 			ostringstream os;
 			os << ball.x_Pos << "|" << ball.y_Pos << "|" \
 				<< player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName << '|' \
@@ -319,7 +333,7 @@ void periodicHandler() {
 	}
 	else if (useRandomLatency) {
 		chrono::milliseconds randomFrame{ dist(generator) };
-		if (time_span.count() >= randomFrame.count()) {
+		if (time_span.count() >= randomFrame.count() && gameStarted) {
 			ostringstream os;
 			os << ball.x_Pos << "|" << ball.y_Pos << "|" \
 				<< player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName << '|' \
@@ -333,6 +347,29 @@ void periodicHandler() {
 				server.wsSend(clientIDs[i], serverMessage);
 
 			t1 = chrono::high_resolution_clock::now();
+		}
+	}
+
+	else if (useIncrementalLatency) {
+		chrono::milliseconds incLatency{latency};
+		if (time_span.count() >= incLatency.count() && gameStarted) {
+			ostringstream os;
+			os << ball.x_Pos << "|" << ball.y_Pos << "|" \
+				<< player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName << '|' \
+				<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
+				<< player3.x_Pos << '|' << player3.y_Pos << '|' << player3.score << '|' << player3.playerName << '|' \
+				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName;
+			string serverMessage = os.str();
+
+			vector<int> clientIDs = server.getClientIDs();
+			for (int i = 0; i < clientIDs.size(); i++)
+				server.wsSend(clientIDs[i], serverMessage);
+
+			t1 = chrono::high_resolution_clock::now();
+			if (latency < latencyMax) {
+				latency += latencyAcc;
+				cout << "Current Latency: " << latency << " ms" << endl;
+			}
 		}
 	}
 }
