@@ -26,9 +26,6 @@ struct pongPaddle {
 	string playerName;
 	int clientID = 9999;
 
-	bool hasUpdated = false;
-	long long tsOfLastMsg = 0;
-
 	void updatePlayerName(string pName) {
 		playerName = pName;
 	}
@@ -43,9 +40,7 @@ struct pongPaddle {
 		y_Speed = 0;
 	}
 
-	void updatePosition(string message, string ts) {
-		tsOfLastMsg = stoll(ts, 0, 0);
-		hasUpdated = true;
+	void updatePosition(string message) {
 
 		// There are only 2 ways a player can be oriented, make sure the orientations are only that.
 		if (orientation == "HORIZONTAL") {
@@ -289,8 +284,13 @@ void messageHandler(int clientID, string message) {
 			else {
 				// ADD TIMESTAMP STUFF HERE.
 				string moveDir = message.substr(0, 1);
-				string ts = message.substr(2);
-				players[i]->updatePosition(moveDir, ts);
+
+				long long clientTS = stoll(message.substr(2), 0, 0);
+				chrono::milliseconds cts{clientTS};
+				chrono::time_point<chrono::system_clock> serverTime = chrono::system_clock::now();
+				cout << chrono::duration<double, std::milli>(serverTime.time_since_epoch() - cts).count() << endl;
+
+				players[i]->updatePosition(moveDir);
 				break;
 			}
 		}
@@ -317,8 +317,14 @@ void periodicHandler() {
 			string serverMessage = os.str();
 
 			vector<int> clientIDs = server.getClientIDs();
-			for (int i = 0; i < clientIDs.size(); i++)
+			for (int i = 0; i < clientIDs.size(); i++) {
+				
+				//chrono::time_point<chrono::system_clock> serverTime = chrono::system_clock::now();
+				//cout << chrono::duration_cast<chrono::milliseconds>(serverTime.time_since_epoch()).count() << endl;
+
 				server.wsSend(clientIDs[i], serverMessage);
+			
+			}
 
 			t1 = chrono::high_resolution_clock::now();
 		}
