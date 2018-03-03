@@ -240,7 +240,7 @@ void openHandler(int clientID) {
 				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName;
 			string serverMessage = os.str();
 
-			server.wsSend(clientID,serverMessage);
+			server.wsSend(clientID, serverMessage);
 
 			break;
 		}
@@ -351,7 +351,7 @@ void periodicHandler() {
 	}
 
 	else if (useIncrementalLatency) {
-		chrono::milliseconds incLatency{latency};
+		chrono::milliseconds incLatency{ latency };
 		if (time_span.count() >= incLatency.count() && gameStarted) {
 			ostringstream os;
 			os << ball.x_Pos << "|" << ball.y_Pos << "|" \
