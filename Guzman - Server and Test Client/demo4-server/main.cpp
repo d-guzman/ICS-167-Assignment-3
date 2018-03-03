@@ -26,6 +26,8 @@ struct pongPaddle {
 	string playerName;
 	int clientID = 9999;
 
+	double lastCalculatedLatency = 0.9999;
+
 	void updatePlayerName(string pName) {
 		playerName = pName;
 	}
@@ -288,8 +290,7 @@ void messageHandler(int clientID, string message) {
 				long long clientTS = stoll(message.substr(2), 0, 0);
 				chrono::milliseconds cts{clientTS};
 				chrono::time_point<chrono::system_clock> serverTime = chrono::system_clock::now();
-				cout << chrono::duration<double, std::milli>(serverTime.time_since_epoch() - cts).count() << endl;
-
+				players[i]->lastCalculatedLatency = chrono::duration<double, std::milli>(serverTime.time_since_epoch() - cts).count();
 				players[i]->updatePosition(moveDir);
 				break;
 			}
@@ -318,14 +319,12 @@ void periodicHandler() {
 
 			vector<int> clientIDs = server.getClientIDs();
 			for (int i = 0; i < clientIDs.size(); i++) {
-				
-				//chrono::time_point<chrono::system_clock> serverTime = chrono::system_clock::now();
-				//cout << chrono::duration_cast<chrono::milliseconds>(serverTime.time_since_epoch()).count() << endl;
-
 				server.wsSend(clientIDs[i], serverMessage);
-			
 			}
 
+			for (int i = 0; i < 4; i++) {
+				cout << "Player " << i + 1 << " latency: " << players[i]->lastCalculatedLatency << "ms" << endl;
+			}
 			t1 = chrono::high_resolution_clock::now();
 		}
 	}
