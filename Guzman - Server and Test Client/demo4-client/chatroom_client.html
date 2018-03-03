@@ -115,6 +115,11 @@
 			player3.setPosition(gameStateData[10], gameStateData[11]);
 			
 			player4.setPosition(gameStateData[14], gameStateData[15]);
+			
+			var timestamp = gameStateData[16];
+			var now = Date.now();
+			var delay = Number(timestamp) - Number(now);
+			
 		}
 
 		function send( text ) {
