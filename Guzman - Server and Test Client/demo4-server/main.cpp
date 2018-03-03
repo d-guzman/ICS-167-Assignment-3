@@ -26,6 +26,9 @@ struct pongPaddle {
 	string playerName;
 	int clientID = 9999;
 
+	bool hasUpdated = false;
+	long long tsOfLastMsg = 0;
+
 	void updatePlayerName(string pName) {
 		playerName = pName;
 	}
@@ -40,11 +43,14 @@ struct pongPaddle {
 		y_Speed = 0;
 	}
 
-	void updatePosition(string message) {
+	void updatePosition(string message, string ts) {
+		tsOfLastMsg = stoll(ts, 0, 0);
+		hasUpdated = true;
+
 		// There are only 2 ways a player can be oriented, make sure the orientations are only that.
 		if (orientation == "HORIZONTAL") {
 			// There are three messages a player can send: Positive Move (RIGHT and DOWN), Negative Move (LEFT and UP), and STILL.
-			if (message == "RIGHT") {
+			if (message == "R") {
 				x_Speed = 4;
 				if ((x_Pos + width) + x_Speed > 700) {
 					x_Speed = 0;
@@ -54,7 +60,7 @@ struct pongPaddle {
 					x_Pos += x_Speed;
 				}
 			}
-			else if (message == "LEFT") {
+			else if (message == "L") {
 				x_Speed = -4;
 				if (x_Pos + x_Speed < 0) {
 					x_Speed = 0;
@@ -64,12 +70,12 @@ struct pongPaddle {
 					x_Pos += x_Speed;
 				}
 			}
-			else if (message == "STOP") {
+			else if (message == "S") {
 				x_Speed = 0;
 			}
 		}
 		else if (orientation == "VERTICAL") {
-			if (message == "UP") {
+			if (message == "U") {
 				y_Speed = -4;
 				if (y_Pos + y_Speed < 0) {
 					y_Speed = 0;
@@ -79,7 +85,7 @@ struct pongPaddle {
 					y_Pos += y_Speed;
 				}
 			}
-			else if (message == "DOWN") {
+			else if (message == "D") {
 				y_Speed = 4;
 				if ((y_Pos + height) + y_Speed > 700) {
 					y_Speed = 0;
@@ -89,7 +95,7 @@ struct pongPaddle {
 					y_Pos += y_Speed;
 				}
 			}
-			else if (message == "STOP") {
+			else if (message == "S") {
 				y_Speed = 0;
 			}
 		}
@@ -213,7 +219,7 @@ bool useRandomLatency = false;
 default_random_engine generator;
 uniform_int_distribution<int> dist(35, 340);
 
-bool useIncrementalLatency = true;
+bool useIncrementalLatency = false;
 int latency = 20;
 int latencyAcc = 10;
 int latencyMax = 400;
@@ -281,7 +287,10 @@ void messageHandler(int clientID, string message) {
 				break;
 			}
 			else {
-				players[i]->updatePosition(message);
+				// ADD TIMESTAMP STUFF HERE.
+				string moveDir = message.substr(0, 1);
+				string ts = message.substr(2);
+				players[i]->updatePosition(moveDir, ts);
 				break;
 			}
 		}
