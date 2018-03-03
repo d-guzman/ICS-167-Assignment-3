@@ -1,1 +1,6 @@
-﻿
+﻿  demo2.cpp
+c:\users\owner\documents\github\ics-167-assignment-3\guzman - server and test client\demo2\demo2.cpp(60): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'SOCKET'
+  c:\users\owner\documents\github\ics-167-assignment-3\guzman - server and test client\demo2\demo2.cpp(60): note: consider using '%lld' in the format string
+  c:\users\owner\documents\github\ics-167-assignment-3\guzman - server and test client\demo2\demo2.cpp(60): note: consider using '%Id' in the format string
+  c:\users\owner\documents\github\ics-167-assignment-3\guzman - server and test client\demo2\demo2.cpp(60): note: consider using '%I64d' in the format string
+  demo2.vcxproj -> C:\Users\Owner\Documents\GitHub\ICS-167-Assignment-3\Guzman - Server and Test Client\x64\Debug\demo2.exe

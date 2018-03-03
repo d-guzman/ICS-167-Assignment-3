@@ -303,30 +303,30 @@ void periodicHandler() {
 
 	static chrono::milliseconds frame{ 17 };
 	static chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
+
 	chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
 	chrono::duration<double, std::milli> time_span = t2 - t1;
+	ostringstream os;
+
+	chrono::time_point<chrono::system_clock> serverTime = chrono::system_clock::now();
 
 	if (!useFixedLatency && !useRandomLatency && !useIncrementalLatency) {
 		if (time_span.count() >= frame.count() && gameStarted) {
-			ostringstream os;
+			
+
 			os << ball.x_Pos << "|" << ball.y_Pos << "|" \
 				<< player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName << '|' \
 				<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
 				<< player3.x_Pos << '|' << player3.y_Pos << '|' << player3.score << '|' << player3.playerName << '|' \
-				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName;
+				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName << '|' \
+				<< chrono::duration_cast<chrono::milliseconds>(serverTime.time_since_epoch()).count();
 			string serverMessage = os.str();
 
 			vector<int> clientIDs = server.getClientIDs();
 			for (int i = 0; i < clientIDs.size(); i++) {
-				
-				//chrono::time_point<chrono::system_clock> serverTime = chrono::system_clock::now();
-				//cout << chrono::duration_cast<chrono::milliseconds>(serverTime.time_since_epoch()).count() << endl;
-
 				server.wsSend(clientIDs[i], serverMessage);
-			
 			}
 
-			t1 = chrono::high_resolution_clock::now();
 		}
 	}
 	else if (useFixedLatency) {
@@ -336,7 +336,8 @@ void periodicHandler() {
 				<< player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName << '|' \
 				<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
 				<< player3.x_Pos << '|' << player3.y_Pos << '|' << player3.score << '|' << player3.playerName << '|' \
-				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName;
+				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName << '|' \
+				<< chrono::duration_cast<chrono::milliseconds>(serverTime.time_since_epoch()).count();
 			string serverMessage = os.str();
 
 			vector<int> clientIDs = server.getClientIDs();
@@ -354,7 +355,8 @@ void periodicHandler() {
 				<< player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName << '|' \
 				<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
 				<< player3.x_Pos << '|' << player3.y_Pos << '|' << player3.score << '|' << player3.playerName << '|' \
-				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName;
+				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName << '|' \
+				<< chrono::duration_cast<chrono::milliseconds>(serverTime.time_since_epoch()).count();
 			string serverMessage = os.str();
 
 			vector<int> clientIDs = server.getClientIDs();
@@ -373,7 +375,8 @@ void periodicHandler() {
 				<< player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName << '|' \
 				<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
 				<< player3.x_Pos << '|' << player3.y_Pos << '|' << player3.score << '|' << player3.playerName << '|' \
-				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName;
+				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName << '|' \
+				<< chrono::duration_cast<chrono::milliseconds>(serverTime.time_since_epoch()).count();
 			string serverMessage = os.str();
 
 			vector<int> clientIDs = server.getClientIDs();
