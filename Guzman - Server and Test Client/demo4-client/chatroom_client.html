@@ -105,10 +105,15 @@
 
 		function log( text ) {
 			gameStateData = text.split('|');
+			
+			var timestamp = gameStateData[18];
+			var now = Date.now();
+			var delay = Number(now) - Number(timestamp);
+			
 			ball.setPosition(gameStateData[0], gameStateData[1]);
 			player1.setPosition(gameStateData[2], gameStateData[3]);
 			var playerScores = document.getElementById('scores');
-			playerScores.textContent = gameStateData[5] +" Score: " + gameStateData[4] + " | " + gameStateData[9] +" Score: " + gameStateData[8] + " | " + gameStateData[13] +" Score: " + gameStateData[12] + " | " + gameStateData[17] +" Score: " + gameStateData[16];
+			playerScores.textContent = gameStateData[5] +" Score: " + gameStateData[4] + " | " + gameStateData[9] +" Score: " + gameStateData[8] + " | " + gameStateData[13] +" Score: " + gameStateData[12] + " | " + gameStateData[17] +" Score: " + gameStateData[16] + " < " + "Latency: " + delay + " ms >";
 			
 			player2.setPosition(gameStateData[6], gameStateData[7]);
 			
@@ -116,10 +121,7 @@
 			
 			player4.setPosition(gameStateData[14], gameStateData[15]);
 			
-			var timestamp = gameStateData[16];
-			var now = Date.now();
-			var delay = Number(timestamp) - Number(now);
-			
+
 		}
 
 		function send( text ) {

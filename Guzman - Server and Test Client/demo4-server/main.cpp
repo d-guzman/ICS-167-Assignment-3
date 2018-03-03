@@ -216,7 +216,7 @@ bool useRandomLatency = false;
 default_random_engine generator;
 uniform_int_distribution<int> dist(35, 340);
 
-bool useIncrementalLatency = false;
+bool useIncrementalLatency = true;
 int latency = 20;
 int latencyAcc = 10;
 int latencyMax = 400;
@@ -309,8 +309,8 @@ void periodicHandler() {
 	chrono::duration<double, std::milli> time_span = t2 - t1;
 	ostringstream os;
 
-	chrono::time_point<chrono::system_clock> serverTime = chrono::system_clock::now();
-
+	static chrono::time_point<chrono::system_clock> t3 = chrono::system_clock::now();
+	
 	if (!useFixedLatency && !useRandomLatency && !useIncrementalLatency) {
 		if (time_span.count() >= frame.count() && gameStarted) {
 			
@@ -320,7 +320,7 @@ void periodicHandler() {
 				<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
 				<< player3.x_Pos << '|' << player3.y_Pos << '|' << player3.score << '|' << player3.playerName << '|' \
 				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName << '|' \
-				<< chrono::duration_cast<chrono::milliseconds>(serverTime.time_since_epoch()).count();
+				<< chrono::duration_cast<chrono::milliseconds>(t3.time_since_epoch()).count();
 			string serverMessage = os.str();
 
 			vector<int> clientIDs = server.getClientIDs();
@@ -328,13 +328,11 @@ void periodicHandler() {
 				server.wsSend(clientIDs[i], serverMessage);
 			}
 
-<<<<<<< HEAD
 			for (int i = 0; i < 4; i++) {
 				cout << "Player " << i + 1 << " latency: " << players[i]->lastCalculatedLatency << "ms" << endl;
 			}
 			t1 = chrono::high_resolution_clock::now();
-=======
->>>>>>> origin/master
+			t3 = chrono::system_clock::now();
 		}
 	}
 	else if (useFixedLatency) {
@@ -345,7 +343,7 @@ void periodicHandler() {
 				<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
 				<< player3.x_Pos << '|' << player3.y_Pos << '|' << player3.score << '|' << player3.playerName << '|' \
 				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName << '|' \
-				<< chrono::duration_cast<chrono::milliseconds>(serverTime.time_since_epoch()).count();
+				<< chrono::duration_cast<chrono::milliseconds>(t3.time_since_epoch()).count();
 			string serverMessage = os.str();
 
 			vector<int> clientIDs = server.getClientIDs();
@@ -353,6 +351,7 @@ void periodicHandler() {
 				server.wsSend(clientIDs[i], serverMessage);
 
 			t1 = chrono::high_resolution_clock::now();
+			t3 = chrono::system_clock::now();
 		}
 	}
 	else if (useRandomLatency) {
@@ -364,7 +363,7 @@ void periodicHandler() {
 				<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
 				<< player3.x_Pos << '|' << player3.y_Pos << '|' << player3.score << '|' << player3.playerName << '|' \
 				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName << '|' \
-				<< chrono::duration_cast<chrono::milliseconds>(serverTime.time_since_epoch()).count();
+				<< chrono::duration_cast<chrono::milliseconds>(t3.time_since_epoch()).count();
 			string serverMessage = os.str();
 
 			vector<int> clientIDs = server.getClientIDs();
@@ -372,6 +371,7 @@ void periodicHandler() {
 				server.wsSend(clientIDs[i], serverMessage);
 
 			t1 = chrono::high_resolution_clock::now();
+			t3 = chrono::system_clock::now();
 		}
 	}
 
@@ -384,7 +384,7 @@ void periodicHandler() {
 				<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
 				<< player3.x_Pos << '|' << player3.y_Pos << '|' << player3.score << '|' << player3.playerName << '|' \
 				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName << '|' \
-				<< chrono::duration_cast<chrono::milliseconds>(serverTime.time_since_epoch()).count();
+				<< chrono::duration_cast<chrono::milliseconds>(t3.time_since_epoch()).count();
 			string serverMessage = os.str();
 
 			vector<int> clientIDs = server.getClientIDs();
@@ -392,9 +392,10 @@ void periodicHandler() {
 				server.wsSend(clientIDs[i], serverMessage);
 
 			t1 = chrono::high_resolution_clock::now();
+			t3 = chrono::system_clock::now();
+
 			if (latency < latencyMax) {
 				latency += latencyAcc;
-				cout << "Current Latency: " << latency << " ms" << endl;
 			}
 		}
 	}
