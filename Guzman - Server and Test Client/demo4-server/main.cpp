@@ -27,6 +27,7 @@ struct pongPaddle {
 	int clientID = 9999;
 
 	double lastCalculatedLatency = 0.9999;
+	chrono::milliseconds lastCalculatedTimeStamp;
 
 	void updatePlayerName(string pName) {
 		playerName = pName;
@@ -216,10 +217,12 @@ bool useRandomLatency = false;
 default_random_engine generator;
 uniform_int_distribution<int> dist(35, 340);
 
-bool useIncrementalLatency = true;
+bool useIncrementalLatency = false;
 int latency = 20;
 int latencyAcc = 10;
 int latencyMax = 400;
+
+bool useSynchronizedLatency = true;
 
 // END DEFINES HERE.
 
@@ -289,6 +292,7 @@ void messageHandler(int clientID, string message) {
 
 				long long clientTS = stoll(message.substr(2), 0, 0);
 				chrono::milliseconds cts{clientTS};
+				players[i]->lastCalculatedTimeStamp = cts;
 				chrono::time_point<chrono::system_clock> serverTime = chrono::system_clock::now();
 				players[i]->lastCalculatedLatency = chrono::duration<double, std::milli>(serverTime.time_since_epoch() - cts).count();
 				players[i]->updatePosition(moveDir);
@@ -311,7 +315,7 @@ void periodicHandler() {
 
 	static chrono::time_point<chrono::system_clock> t3 = chrono::system_clock::now();
 	
-	if (!useFixedLatency && !useRandomLatency && !useIncrementalLatency) {
+	if (!useFixedLatency && !useRandomLatency && !useIncrementalLatency && !useSynchronizedLatency) {
 		if (time_span.count() >= frame.count() && gameStarted) {
 			
 
@@ -397,6 +401,35 @@ void periodicHandler() {
 			if (latency < latencyMax) {
 				latency += latencyAcc;
 			}
+		}
+	}
+	else if (useSynchronizedLatency) {
+		if (time_span.count() >= frame.count() && gameStarted) {
+			
+			chrono::milliseconds lowest{ 999999999999999999 };
+			for (int i = 0; i < 4; i++) {
+				if (players[i]->lastCalculatedTimeStamp<lowest) {
+					lowest = players[i]->lastCalculatedTimeStamp;
+				}
+			}
+			os << ball.x_Pos << "|" << ball.y_Pos << "|" \
+				<< player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName << '|' \
+				<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
+				<< player3.x_Pos << '|' << player3.y_Pos << '|' << player3.score << '|' << player3.playerName << '|' \
+				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName << '|' \
+				<< chrono::duration_cast<chrono::milliseconds>(t3.time_since_epoch()).count();
+			string serverMessage = os.str();
+
+			vector<int> clientIDs = server.getClientIDs();
+			for (int i = 0; i < clientIDs.size(); i++) {
+				server.wsSend(clientIDs[i], serverMessage);
+			}
+
+			for (int i = 0; i < 4; i++) {
+				cout << "Player " << i + 1 << " latency: " << players[i]->lastCalculatedLatency << "ms" << endl;
+			}
+			t1 = chrono::high_resolution_clock::now();
+			t3 = chrono::system_clock::now();
 		}
 	}
 }
