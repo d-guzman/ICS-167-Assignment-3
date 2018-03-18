@@ -49,12 +49,12 @@
 		
 		function startGame(){
 			gameArea.start();
-			player1 = new component(300,650, "#f94d4d", 100, 10, "rectangle");
-			player2 = new component(300,50, "#1d68e0", 100, 10, "rectangle");
-			player3 = new component(50,300, "#1ce037", 10, 100, "rectangle");
-			player4 = new component(650,300, "#fff726", 10, 100, "rectangle");
+			player1 = new component(300,650, "#f94d4d", 100, 10, "rectangle", "H");
+			player2 = new component(300,50, "#1d68e0", 100, 10, "rectangle", "H");
+			player3 = new component(50,300, "#1ce037", 10, 100, "rectangle", "V");
+			player4 = new component(650,300, "#fff726", 10, 100, "rectangle", "V");
 			// Add new paddle components here.
-			ball = new component(350,350,"#ffffff", 0,0, "circle");
+			ball = new component(350,350,"#ffffff", 0,0, "circle", "N");
 		}
 		var gameArea = {
 			canvas : document.createElement("canvas"),
@@ -70,12 +70,13 @@
 			}
 		};
 		
-		function component(x, y, color, width, height, shape) {
+		function component(x, y, color, width, height, shape, orientation) {
 			this.x = x;
 			this.y = y; 
 			this.width = width;
 			this.height = height;
 			this.shape = shape;
+			this.orientation = orientation;
 			this.update = function(){
 				if(this.shape == "rectangle"){
 					ctx = gameArea.context;
@@ -94,12 +95,16 @@
 				this.x = x;
 				this.y = y;
 			};
+			this.move = function(x,y){
+				this.x += x;
+				this.y += y;
+			};
 		}
 		
 		function updateGameArea(){
 			// Testing new Input system.
 			for (var key in keysDown){
-				if (Number(key) == 37){
+				if (Number(key) == 37){				
 					Server.send('message', "L|" + Date.now());
 				}
 				else if (Number(key) == 39){
@@ -128,6 +133,7 @@
 			if (gameStateData[0] == 'PN'){
 				playerNum = gameStateData[1];
 			}
+			
 			else{
 				var timestamp = gameStateData[18];
 				var now = Date.now();
@@ -144,8 +150,6 @@
 				player4.setPosition(gameStateData[14], gameStateData[15]);
 				
 				var playerScores = document.getElementById('scores');
-				//playerScores.textContent = playerNum;
-				playerScores.textContent = gameStateData[5] +" Score: " + gameStateData[4] + " | " + gameStateData[9] +" Score: " + gameStateData[8] + " | " + gameStateData[13] +" Score: " + gameStateData[12] + " | " + gameStateData[17] +" Score: " + gameStateData[16] + " < " + "Latency: " + delay + " ms >";
 				if (playerNum == 1){
 					playerScores.textContent = " -YOU- " + gameStateData[5] +" Score: " + gameStateData[4] + " | " + gameStateData[9] +" Score: " + gameStateData[8] + " | " + gameStateData[13] +" Score: " + gameStateData[12] + " | " + gameStateData[17] +" Score: " + gameStateData[16] + " < " + "Latency: " + delay + " ms >";
 				}

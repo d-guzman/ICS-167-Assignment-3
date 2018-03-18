@@ -244,7 +244,7 @@ void openHandler(int clientID) {
 			
 
 			ostringstream os;
-			os << "PN" << '|' <<playersConnected;
+			os << "PN" << '|' <<i+1;
 			string serverMessage = os.str();
 			server.wsSend(players[i]->clientID, serverMessage);
 
