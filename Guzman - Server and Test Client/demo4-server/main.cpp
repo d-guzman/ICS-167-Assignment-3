@@ -241,16 +241,12 @@ void openHandler(int clientID) {
 			cout << "Player " << i + 1 << " has joined. Client ID: " << clientID << endl;
 			players[i]->updateClientID(clientID);
 			playersConnected++;
+			
 
 			ostringstream os;
-			os << ball.x_Pos << "|" << ball.y_Pos << "|" \
-				<< player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName << '|' \
-				<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
-				<< player3.x_Pos << '|' << player3.y_Pos << '|' << player3.score << '|' << player3.playerName << '|' \
-				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName;
+			os << "PN" << '|' <<playersConnected;
 			string serverMessage = os.str();
-
-			server.wsSend(clientID, serverMessage);
+			server.wsSend(players[i]->clientID, serverMessage);
 
 			break;
 		}
@@ -283,25 +279,37 @@ void closeHandler(int clientID) {
 
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message) {
-	if (gameStarted) {
-		for (int i = 0; i < 4; i++) {
-			if (players[i]->clientID == clientID) {
-				if (message[0] == 'N') {
+	for (int i = 0; i < 4; i++) {
+		if (players[i]->clientID == clientID) {
+			if (message[0] == 'N') {
+				players[i]->updatePlayerName(message.substr(1));
 
-					players[i]->updatePlayerName(message.substr(1));
-					break;
+				ostringstream os;
+				os << ball.x_Pos << "|" << ball.y_Pos << "|" \
+					<< player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName << '|' \
+					<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
+					<< player3.x_Pos << '|' << player3.y_Pos << '|' << player3.score << '|' << player3.playerName << '|' \
+					<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName;
+				string serverMessage = os.str();
+
+				vector<int> clientIDs = server.getClientIDs();
+				for (int i = 0; i < clientIDs.size(); i++) {
+					server.wsSend(clientIDs[i], serverMessage);
 				}
-				else {
-					// ADD TIMESTAMP STUFF HERE.
-					string moveDir = message.substr(0, 1);
 
-					//cout << "Player with client ID " << clientID << " is doing move: " << moveDir << endl;
+				break;
+			}
+			else {
+				if (gameStarted) {
+					string moveDir = message.substr(0, 1);
 
 					long long clientTS = stoll(message.substr(2), 0, 0);
 					chrono::milliseconds cts{ clientTS };
 					players[i]->lastCalculatedTimeStamp = cts;
+
 					chrono::time_point<chrono::system_clock> serverTime = chrono::system_clock::now();
 					players[i]->lastCalculatedLatency = chrono::duration<double, std::milli>(serverTime.time_since_epoch() - cts).count();
+
 					players[i]->updatePosition(moveDir);
 					break;
 				}
