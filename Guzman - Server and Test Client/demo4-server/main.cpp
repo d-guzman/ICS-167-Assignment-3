@@ -121,22 +121,26 @@ struct pongBall {
 
 		if (bottomX > 700) {			//Player 4
 			x_Pos = 695;
-			x_Speed = -x_Speed;
+			x_Speed = 0;
+			y_Speed = -3;
 			givePoint();
 		}
 		else if (topX < 0) {			// Player 3
 			x_Pos = 5;
-			x_Speed = -x_Speed;
+			x_Speed = 0;
+			y_Speed = 3;
 			givePoint();
 		}
 		else if (bottomY > 700) {		// Player 1
 			y_Pos = 695;
-			y_Speed = -y_Speed;
+			y_Speed = 0;
+			x_Speed = 3;
 			givePoint();
 		}
 		else if (topY < 0) {			// Player 2
 			y_Pos = 5;
-			y_Speed = -y_Speed;
+			y_Speed = 0;
+			x_Speed = -3;
 			givePoint();
 		}
 
@@ -190,7 +194,7 @@ struct pongBall {
 		}
 		else if (indexOfPlayer == 3) {
 			x_Speed = 0;
-			y_Speed = -3;
+			y_Speed = 3;
 		}
 		indexOfPlayer = 4;
 	}
@@ -222,7 +226,7 @@ int latency = 20;
 int latencyAcc = 10;
 int latencyMax = 400;
 
-bool useSynchronizedLatency = true;
+bool useSynchronizedLatency = false;
 
 // END DEFINES HERE.
 
@@ -279,24 +283,28 @@ void closeHandler(int clientID) {
 
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message) {
-	for (int i = 0; i < 4; i++) {
-		if (players[i]->clientID == clientID) {
-			if (message[0] == 'N') {
+	if (gameStarted) {
+		for (int i = 0; i < 4; i++) {
+			if (players[i]->clientID == clientID) {
+				if (message[0] == 'N') {
 
-				players[i]->updatePlayerName(message.substr(1));
-				break;
-			}
-			else {
-				// ADD TIMESTAMP STUFF HERE.
-				string moveDir = message.substr(0, 1);
+					players[i]->updatePlayerName(message.substr(1));
+					break;
+				}
+				else {
+					// ADD TIMESTAMP STUFF HERE.
+					string moveDir = message.substr(0, 1);
 
-				long long clientTS = stoll(message.substr(2), 0, 0);
-				chrono::milliseconds cts{clientTS};
-				players[i]->lastCalculatedTimeStamp = cts;
-				chrono::time_point<chrono::system_clock> serverTime = chrono::system_clock::now();
-				players[i]->lastCalculatedLatency = chrono::duration<double, std::milli>(serverTime.time_since_epoch() - cts).count();
-				players[i]->updatePosition(moveDir);
-				break;
+					//cout << "Player with client ID " << clientID << " is doing move: " << moveDir << endl;
+
+					long long clientTS = stoll(message.substr(2), 0, 0);
+					chrono::milliseconds cts{ clientTS };
+					players[i]->lastCalculatedTimeStamp = cts;
+					chrono::time_point<chrono::system_clock> serverTime = chrono::system_clock::now();
+					players[i]->lastCalculatedLatency = chrono::duration<double, std::milli>(serverTime.time_since_epoch() - cts).count();
+					players[i]->updatePosition(moveDir);
+					break;
+				}
 			}
 		}
 	}
@@ -332,9 +340,10 @@ void periodicHandler() {
 				server.wsSend(clientIDs[i], serverMessage);
 			}
 
-			for (int i = 0; i < 4; i++) {
-				cout << "Player " << i + 1 << " latency: " << players[i]->lastCalculatedLatency << "ms" << endl;
-			}
+			//for (int i = 0; i < 4; i++) {
+			//	cout << "player " << i + 1 << " latency: " << players[i]->lastcalculatedlatency << "ms" << endl;
+			//}
+
 			t1 = chrono::high_resolution_clock::now();
 			t3 = chrono::system_clock::now();
 		}
@@ -425,9 +434,10 @@ void periodicHandler() {
 				server.wsSend(clientIDs[i], serverMessage);
 			}
 
-			for (int i = 0; i < 4; i++) {
-				cout << "Player " << i + 1 << " latency: " << players[i]->lastCalculatedLatency << "ms" << endl;
-			}
+			//for (int i = 0; i < 4; i++) {
+			//	cout << "Player " << i + 1 << " latency: " << players[i]->lastCalculatedLatency << "ms" << endl;
+			//}
+
 			t1 = chrono::high_resolution_clock::now();
 			t3 = chrono::system_clock::now();
 		}

@@ -20,27 +20,29 @@
 	<script>
 		var Server;
 		var gameStateData;
-		//var keysDown = {};
+		var keysDown = {};
 		// Pong stuff goes in here.
 		window.addEventListener("keydown", function(event){
-			//keysDown[event.keyCode] = true;
-			if(Number(event.keyCode) == 37){
-				Server.send('message', "L|" + Date.now());
-			}
-			else if(Number(event.keyCode) == 39){
-				Server.send('message', "R|" + Date.now());
-			}
-			else if(Number(event.keyCode) == 38){
-				Server.send('message', "U|" + Date.now());
-			}
-			else if(Number(event.keyCode) == 40){
-				Server.send('message', "D|" + Date.now());
-			}
+			keysDown[event.keyCode] = true;
+			
+			//if(Number(event.keyCode) == 37){
+			//	Server.send('message', "L|" + Date.now());
+			//}
+			//else if(Number(event.keyCode) == 39){
+			//	Server.send('message', "R|" + Date.now());
+			//}
+			//else if(Number(event.keyCode) == 38){
+			//	Server.send('message', "U|" + Date.now());
+			//}
+			//else if(Number(event.keyCode) == 40){
+			//	Server.send('message', "D|" + Date.now());
+			//}
+			
 			//Add checks for the UP and DOWN keys, and send the strings 'UP' and 'DOWN' respectively
 		});
 		
 		window.addEventListener("keyup", function(event) {
-			//delete keysDown[event.keyCode];
+			delete keysDown[event.keyCode];
 			Server.send('message', "S|" + Date.now());
 		});
 		
@@ -94,6 +96,22 @@
 		}
 		
 		function updateGameArea(){
+			// Testing new Input system.
+			for (var key in keysDown){
+				if (Number(key) == 37){
+					Server.send('message', "L|" + Date.now());
+				}
+				else if (Number(key) == 39){
+					Server.send('message', "R|" + Date.now());
+				}
+				else if (Number(key) == 38){
+					Server.send('message', "U|" + Date.now());
+				}
+				else if (Number(key) == 40){
+					Server.send('message', "D|" + Date.now());
+				}
+			}
+			
 			gameArea.clear();
 			ball.update();
 			player1.update();
