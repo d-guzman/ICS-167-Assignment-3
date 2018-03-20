@@ -78,6 +78,8 @@
 			this.height = height;
 			this.shape = shape;
 			this.orientation = orientation;
+			this.x_Speed = 0;
+			this.y_Speed = 0;
 			this.update = function(){
 				if(this.shape == "rectangle"){
 					ctx = gameArea.context;
@@ -85,6 +87,9 @@
 					ctx.fillRect(this.x, this.y, this.width, this.height);
 				}
 				else if(this.shape == "circle"){
+					this.x -= -(this.x_Speed);
+					this.y -= -(this.y_Speed);
+					
 					ctx = gameArea.context;
 					ctx.beginPath();
 					ctx.arc( this.x, this.y, 6, 2 * Math.PI, false );
@@ -96,9 +101,9 @@
 				this.x = x;
 				this.y = y;
 			};
-			this.move = function(x,y){
-				this.x = this.x + x;
-				this.y = this.y + y;
+			this.setSpeed = function(x,y){
+				this.x_Speed = x;
+				this.y_Speed = y;
 			};
 		}
 		
@@ -144,6 +149,9 @@
 			}
 			
 			gameArea.clear();
+			
+
+			
 			ball.update();
 			player1.update();
 			player2.update();
@@ -165,6 +173,8 @@
 				var delay = Number(now) - Number(timestamp);
 				
 				ball.setPosition(gameStateData[0], gameStateData[1]);
+				ball.setSpeed(gameStateData[19], gameStateData[20]);
+
 				
 				//player1.setPosition(gameStateData[2], gameStateData[3]);
 				//player2.setPosition(gameStateData[6], gameStateData[7]);
