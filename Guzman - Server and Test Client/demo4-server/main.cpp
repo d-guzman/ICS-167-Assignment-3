@@ -214,7 +214,7 @@ bool gameStarted = false;
 
 // Latency Testing Booleans ---------------------------------------------------------------------------------------------------------
 // ONLY ONE SHOULD BE TRUE AT ANY POINT.
-bool useFixedLatency = false;
+bool useFixedLatency = true;
 float latencyScalar = 6.0;			// Change this value to increase the latency in sending a message back to clients
 
 bool useRandomLatency = false;

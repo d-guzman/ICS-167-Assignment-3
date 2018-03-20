@@ -22,6 +22,7 @@
 		var gameStateData;
 		var keysDown = {};
 		var playerNum;
+		var keysDownIsEmpty;
 		// Pong stuff goes in here.
 		window.addEventListener("keydown", function(event){
 			keysDown[event.keyCode] = true;
@@ -49,10 +50,10 @@
 		
 		function startGame(){
 			gameArea.start();
-			player1 = new component(300,650, "#f94d4d", 100, 10, "rectangle", "H");
-			player2 = new component(300,50, "#1d68e0", 100, 10, "rectangle", "H");
-			player3 = new component(50,300, "#1ce037", 10, 100, "rectangle", "V");
-			player4 = new component(650,300, "#fff726", 10, 100, "rectangle", "V");
+			player1 = new component(300,685, "#f94d4d", 100, 10, "rectangle", "H");
+			player2 = new component(300,5, "#1d68e0", 100, 10, "rectangle", "H");
+			player3 = new component(5,300, "#1ce037", 10, 100, "rectangle", "V");
+			player4 = new component(685,300, "#fff726", 10, 100, "rectangle", "V");
 			// Add new paddle components here.
 			ball = new component(350,350,"#ffffff", 0,0, "circle", "N");
 		}
@@ -96,24 +97,48 @@
 				this.y = y;
 			};
 			this.move = function(x,y){
-				this.x += x;
-				this.y += y;
+				this.x = this.x + x;
+				this.y = this.y + y;
 			};
 		}
 		
 		function updateGameArea(){
-			// Testing new Input system.
 			for (var key in keysDown){
-				if (Number(key) == 37){				
+				if (Number(key) == 37){
+					if(playerNum == 1){
+						player1.setPosition((player1.x - 4), player1.y);
+					}
+					else if(playerNum == 2){
+						player2.setPosition((player2.x - 4), player2.y);
+					}
 					Server.send('message', "L|" + Date.now());
 				}
 				else if (Number(key) == 39){
+					if(playerNum == 1){
+						player1.setPosition((player1.x - (-4)), player1.y);			//WHY THE FUCK. THIS IS NOT OKAY. WHY DOESN'T '+4' WORK LIKE ANY OTHER LANGUAGE.
+					}
+					else if(playerNum == 2){
+						player2.setPosition((player2.x - (-4)), player2.y);
+					}
 					Server.send('message', "R|" + Date.now());
+
 				}
 				else if (Number(key) == 38){
+					if(playerNum == 3){
+						player3.setPosition(player3.x, (player3.y - 4));
+					}
+					else if(playerNum == 4){
+						player4.setPosition(player4.x, (player4.y - 4));
+					}
 					Server.send('message', "U|" + Date.now());
 				}
 				else if (Number(key) == 40){
+					if(playerNum == 3){
+						player3.setPosition(player3.x, (player3.y - (-4)));
+					}
+					else if(playerNum == 4){
+						player4.setPosition(player4.x, (player4.y - (-4)));
+					}
 					Server.send('message', "D|" + Date.now());
 				}
 			}
@@ -141,13 +166,62 @@
 				
 				ball.setPosition(gameStateData[0], gameStateData[1]);
 				
-				player1.setPosition(gameStateData[2], gameStateData[3]);
+				//player1.setPosition(gameStateData[2], gameStateData[3]);
+				//player2.setPosition(gameStateData[6], gameStateData[7]);
+				//player3.setPosition(gameStateData[10], gameStateData[11]);
+				//player4.setPosition(gameStateData[14], gameStateData[15]);
 				
-				player2.setPosition(gameStateData[6], gameStateData[7]);
-				
-				player3.setPosition(gameStateData[10], gameStateData[11]);
-				
-				player4.setPosition(gameStateData[14], gameStateData[15]);
+				if (playerNum == 1){
+					keysDownIsEmpty = true;
+					for (var key in keysDown){
+						keysDownIsEmpty = false;
+					}
+					if(keysDownIsEmpty){
+						player1.setPosition(gameStateData[2], gameStateData[3]);
+					}
+					
+					player2.setPosition(gameStateData[6], gameStateData[7]);
+					player3.setPosition(gameStateData[10], gameStateData[11]);
+					player4.setPosition(gameStateData[14], gameStateData[15]);
+				}
+				else if (playerNum == 2){
+					keysDownIsEmpty = true;
+					for (var key in keysDown){
+						keysDownIsEmpty = false;
+					}
+					if(keysDownIsEmpty){
+						player2.setPosition(gameStateData[6], gameStateData[7]);
+					}
+					player1.setPosition(gameStateData[2], gameStateData[3]);
+					player3.setPosition(gameStateData[10], gameStateData[11]);
+					player4.setPosition(gameStateData[14], gameStateData[15]);
+				}
+				else if (playerNum == 3){
+					keysDownIsEmpty = true;
+					for (var key in keysDown){
+						keysDownIsEmpty = false;
+					}
+					if(keysDownIsEmpty){
+						player3.setPosition(gameStateData[10], gameStateData[11]);
+					}
+					
+					player1.setPosition(gameStateData[2], gameStateData[3]);
+					player2.setPosition(gameStateData[6], gameStateData[7]);
+					player4.setPosition(gameStateData[14], gameStateData[15]);
+				}
+				else if (playerNum == 4){
+					keysDownIsEmpty = true;
+					for (var key in keysDown){
+						keysDownIsEmpty = false;
+					}
+					if(keysDownIsEmpty){
+						player4.setPosition(gameStateData[14], gameStateData[15]);
+					}
+					player1.setPosition(gameStateData[2], gameStateData[3]);
+					player2.setPosition(gameStateData[6], gameStateData[7]);
+					player3.setPosition(gameStateData[10], gameStateData[11]);
+				}
+
 				
 				var playerScores = document.getElementById('scores');
 				if (playerNum == 1){
