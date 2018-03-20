@@ -226,8 +226,6 @@ int latency = 20;
 int latencyAcc = 10;
 int latencyMax = 400;
 
-bool useSynchronizedLatency = false;
-
 // END DEFINES HERE.
 
 /* called when a client connects */
@@ -331,10 +329,8 @@ void periodicHandler() {
 
 	static chrono::time_point<chrono::system_clock> t3 = chrono::system_clock::now();
 	
-	if (!useFixedLatency && !useRandomLatency && !useIncrementalLatency && !useSynchronizedLatency) {
+	if (!useFixedLatency && !useRandomLatency && !useIncrementalLatency) {
 		if (time_span.count() >= frame.count() && gameStarted) {
-			
-
 			os << ball.x_Pos << "|" << ball.y_Pos << "|" \
 				<< player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName << '|' \
 				<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
@@ -347,10 +343,6 @@ void periodicHandler() {
 			for (int i = 0; i < clientIDs.size(); i++) {
 				server.wsSend(clientIDs[i], serverMessage);
 			}
-
-			//for (int i = 0; i < 4; i++) {
-			//	cout << "player " << i + 1 << " latency: " << players[i]->lastcalculatedlatency << "ms" << endl;
-			//}
 
 			t1 = chrono::high_resolution_clock::now();
 			t3 = chrono::system_clock::now();
@@ -418,36 +410,6 @@ void periodicHandler() {
 			if (latency < latencyMax) {
 				latency += latencyAcc;
 			}
-		}
-	}
-	else if (useSynchronizedLatency) {
-		if (time_span.count() >= frame.count() && gameStarted) {
-			
-			chrono::milliseconds lowest{ 999999999999999999 };
-			for (int i = 0; i < 4; i++) {
-				if (players[i]->lastCalculatedTimeStamp<lowest) {
-					lowest = players[i]->lastCalculatedTimeStamp;
-				}
-			}
-			os << ball.x_Pos << "|" << ball.y_Pos << "|" \
-				<< player1.x_Pos << '|' << player1.y_Pos << '|' << player1.score << '|' << player1.playerName << '|' \
-				<< player2.x_Pos << '|' << player2.y_Pos << '|' << player2.score << '|' << player2.playerName << '|' \
-				<< player3.x_Pos << '|' << player3.y_Pos << '|' << player3.score << '|' << player3.playerName << '|' \
-				<< player4.x_Pos << '|' << player4.y_Pos << '|' << player4.score << '|' << player4.playerName << '|' \
-				<< chrono::duration_cast<chrono::milliseconds>(t3.time_since_epoch()).count() << '|' << ball.x_Speed << '|' << ball.y_Speed;
-			string serverMessage = os.str();
-
-			vector<int> clientIDs = server.getClientIDs();
-			for (int i = 0; i < clientIDs.size(); i++) {
-				server.wsSend(clientIDs[i], serverMessage);
-			}
-
-			//for (int i = 0; i < 4; i++) {
-			//	cout << "Player " << i + 1 << " latency: " << players[i]->lastCalculatedLatency << "ms" << endl;
-			//}
-
-			t1 = chrono::high_resolution_clock::now();
-			t3 = chrono::system_clock::now();
 		}
 	}
 }

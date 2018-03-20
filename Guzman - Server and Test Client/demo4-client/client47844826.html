@@ -1,0 +1,309 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset='UTF-8' />
+	<style>
+		input, textarea {border:1px solid #CCC;margin:0px;padding:0px}
+
+        #ip {line-height:20px}
+        #port {line-height:20px}
+		#body {max-width:800px;margin:auto}
+
+
+		canvas {
+			border: 5px solid #000000;
+			background-color: #262626;
+		}
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script src="fancywebsocket.js"></script>
+	<script>
+		var Server;
+		var gameStateData;
+		var keysDown = {};
+		var playerNum;
+		var keysDownIsEmpty;
+		// Pong stuff goes in here.
+		window.addEventListener("keydown", function(event){
+			keysDown[event.keyCode] = true;
+			
+			//if(Number(event.keyCode) == 37){
+			//	Server.send('message', "L|" + Date.now());
+			//}
+			//else if(Number(event.keyCode) == 39){
+			//	Server.send('message', "R|" + Date.now());
+			//}
+			//else if(Number(event.keyCode) == 38){
+			//	Server.send('message', "U|" + Date.now());
+			//}
+			//else if(Number(event.keyCode) == 40){
+			//	Server.send('message', "D|" + Date.now());
+			//}
+			
+			//Add checks for the UP and DOWN keys, and send the strings 'UP' and 'DOWN' respectively
+		});
+		
+		window.addEventListener("keyup", function(event) {
+			delete keysDown[event.keyCode];
+			Server.send('message', "S|" + Date.now());
+		});
+		
+		function startGame(){
+			gameArea.start();
+			player1 = new component(300,685, "#f94d4d", 100, 10, "rectangle", "H");
+			player2 = new component(300,5, "#1d68e0", 100, 10, "rectangle", "H");
+			player3 = new component(5,300, "#1ce037", 10, 100, "rectangle", "V");
+			player4 = new component(685,300, "#fff726", 10, 100, "rectangle", "V");
+			// Add new paddle components here.
+			ball = new component(350,350,"#ffffff", 0,0, "circle", "N");
+		}
+		var gameArea = {
+			canvas : document.createElement("canvas"),
+			start : function () {
+				this.canvas.width = 700;
+				this.canvas.height = 700;
+				this.context = this.canvas.getContext("2d");
+				document.body.appendChild(this.canvas);
+				this.interval = setInterval(updateGameArea, 17);
+			},
+			clear : function() {
+				this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+			}
+		};
+		
+		function component(x, y, color, width, height, shape, orientation) {
+			this.x = x;
+			this.y = y; 
+			this.width = width;
+			this.height = height;
+			this.shape = shape;
+			this.orientation = orientation;
+			this.x_Speed = 0;
+			this.y_Speed = 0;
+			this.update = function(){
+				if(this.shape == "rectangle"){
+					ctx = gameArea.context;
+					ctx.fillStyle = color;
+					ctx.fillRect(this.x, this.y, this.width, this.height);
+				}
+				else if(this.shape == "circle"){
+					this.x -= -(this.x_Speed);
+					this.y -= -(this.y_Speed);
+					
+					ctx = gameArea.context;
+					ctx.beginPath();
+					ctx.arc( this.x, this.y, 6, 2 * Math.PI, false );
+					ctx.fillStyle = color;
+					ctx.fill();
+				}
+			};
+			this.setPosition = function(x,y){
+				this.x = x;
+				this.y = y;
+			};
+			this.setSpeed = function(x,y){
+				this.x_Speed = x;
+				this.y_Speed = y;
+			};
+		}
+		
+		function updateGameArea(){
+			for (var key in keysDown){
+				if (Number(key) == 37){
+					if(playerNum == 1){
+						player1.setPosition((player1.x - 4), player1.y);
+					}
+					else if(playerNum == 2){
+						player2.setPosition((player2.x - 4), player2.y);
+					}
+					Server.send('message', "L|" + Date.now());
+				}
+				else if (Number(key) == 39){
+					if(playerNum == 1){
+						player1.setPosition((player1.x - (-4)), player1.y);			//WHY THE FUCK. THIS IS NOT OKAY. WHY DOESN'T '+4' WORK LIKE ANY OTHER LANGUAGE.
+					}
+					else if(playerNum == 2){
+						player2.setPosition((player2.x - (-4)), player2.y);
+					}
+					Server.send('message', "R|" + Date.now());
+
+				}
+				else if (Number(key) == 38){
+					if(playerNum == 3){
+						player3.setPosition(player3.x, (player3.y - 4));
+					}
+					else if(playerNum == 4){
+						player4.setPosition(player4.x, (player4.y - 4));
+					}
+					Server.send('message', "U|" + Date.now());
+				}
+				else if (Number(key) == 40){
+					if(playerNum == 3){
+						player3.setPosition(player3.x, (player3.y - (-4)));
+					}
+					else if(playerNum == 4){
+						player4.setPosition(player4.x, (player4.y - (-4)));
+					}
+					Server.send('message', "D|" + Date.now());
+				}
+			}
+			
+			gameArea.clear();
+			
+
+			
+			ball.update();
+			player1.update();
+			player2.update();
+			player3.update();
+			player4.update();
+		}
+		// end pong zone
+
+		function log( text ) {
+			gameStateData = text.split('|');
+			
+			if (gameStateData[0] == 'PN'){
+				playerNum = gameStateData[1];
+			}
+			
+			else{
+				var timestamp = gameStateData[18];
+				var now = Date.now();
+				var delay = Number(now) - Number(timestamp);
+				
+				ball.setPosition(gameStateData[0], gameStateData[1]);
+				ball.setSpeed(gameStateData[19], gameStateData[20]);
+
+				
+				//player1.setPosition(gameStateData[2], gameStateData[3]);
+				//player2.setPosition(gameStateData[6], gameStateData[7]);
+				//player3.setPosition(gameStateData[10], gameStateData[11]);
+				//player4.setPosition(gameStateData[14], gameStateData[15]);
+				
+				if (playerNum == 1){
+					keysDownIsEmpty = true;
+					for (var key in keysDown){
+						keysDownIsEmpty = false;
+					}
+					if(keysDownIsEmpty){
+						player1.setPosition(gameStateData[2], gameStateData[3]);
+					}
+					
+					player2.setPosition(gameStateData[6], gameStateData[7]);
+					player3.setPosition(gameStateData[10], gameStateData[11]);
+					player4.setPosition(gameStateData[14], gameStateData[15]);
+				}
+				else if (playerNum == 2){
+					keysDownIsEmpty = true;
+					for (var key in keysDown){
+						keysDownIsEmpty = false;
+					}
+					if(keysDownIsEmpty){
+						player2.setPosition(gameStateData[6], gameStateData[7]);
+					}
+					player1.setPosition(gameStateData[2], gameStateData[3]);
+					player3.setPosition(gameStateData[10], gameStateData[11]);
+					player4.setPosition(gameStateData[14], gameStateData[15]);
+				}
+				else if (playerNum == 3){
+					keysDownIsEmpty = true;
+					for (var key in keysDown){
+						keysDownIsEmpty = false;
+					}
+					if(keysDownIsEmpty){
+						player3.setPosition(gameStateData[10], gameStateData[11]);
+					}
+					
+					player1.setPosition(gameStateData[2], gameStateData[3]);
+					player2.setPosition(gameStateData[6], gameStateData[7]);
+					player4.setPosition(gameStateData[14], gameStateData[15]);
+				}
+				else if (playerNum == 4){
+					keysDownIsEmpty = true;
+					for (var key in keysDown){
+						keysDownIsEmpty = false;
+					}
+					if(keysDownIsEmpty){
+						player4.setPosition(gameStateData[14], gameStateData[15]);
+					}
+					player1.setPosition(gameStateData[2], gameStateData[3]);
+					player2.setPosition(gameStateData[6], gameStateData[7]);
+					player3.setPosition(gameStateData[10], gameStateData[11]);
+				}
+
+				
+				var playerScores = document.getElementById('scores');
+				if (playerNum == 1){
+					playerScores.textContent = " -YOU- " + gameStateData[5] +" Score: " + gameStateData[4] + " | " + gameStateData[9] +" Score: " + gameStateData[8] + " | " + gameStateData[13] +" Score: " + gameStateData[12] + " | " + gameStateData[17] +" Score: " + gameStateData[16] + " < " + "Latency: " + delay + " ms >";
+				}
+				else if (playerNum == 2){
+					playerScores.textContent = gameStateData[5] +" Score: " + gameStateData[4] + " | " + " -YOU- " + gameStateData[9] +" Score: " + gameStateData[8] + " | " + gameStateData[13] +" Score: " + gameStateData[12] + " | " + gameStateData[17] +" Score: " + gameStateData[16] + " < " + "Latency: " + delay + " ms >";
+				}
+				else if (playerNum == 3){
+					playerScores.textContent = gameStateData[5] +" Score: " + gameStateData[4] + " | " + gameStateData[9] +" Score: " + gameStateData[8] + " | " + " -YOU- " + gameStateData[13] +" Score: " + gameStateData[12] + " | " + gameStateData[17] +" Score: " + gameStateData[16] + " < " + "Latency: " + delay + " ms >";
+				}
+				else if (playerNum == 4){
+					playerScores.textContent = gameStateData[5] +" Score: " + gameStateData[4] + " | " + gameStateData[9] +" Score: " + gameStateData[8] + " | " + gameStateData[13] +" Score: " + gameStateData[12] + " | " + " -YOU- " + gameStateData[17] +" Score: " + gameStateData[16] + " < " + "Latency: " + delay + " ms >";
+				}
+			}
+			
+		}
+
+		function send( text ) {
+			Server.send( 'message', text );
+		}
+
+        function connect(){
+            log('Connecting...');
+			Server = new FancyWebSocket('ws://' + document.getElementById('ip').value + ':' + document.getElementById('port').value);
+			
+			
+			$('#message').keypress(function(e) {
+				if ( e.keyCode == 13 && this.value ) {
+					log( 'You: ' + this.value );
+					send( this.value );
+
+					$(this).val('');
+				}
+			});
+
+			//Let the user know we're connected
+			Server.bind('open', function() {
+                document.getElementById("cntBtn").disabled = true;
+				var playerName = 'N' + document.getElementById('name').value;
+				Server.send('message', playerName);
+			});
+
+			//OH NOES! Disconnection occurred.
+			Server.bind('close', function( data ) {
+                document.getElementById("cntBtn").disabled = false;
+				log( "Disconnected." );
+			});
+
+			//Log any messages sent from server
+			Server.bind('message', function( payload ) {
+				log( payload );
+			});
+
+			Server.connect();
+			// Send the player name after connecting.
+        }
+
+	</script>
+</head>
+
+<body onload="startGame()">
+	<div id='body'>
+        Server ip: <input type='text' id='ip' name='ip'>
+        Server port: <input type='text' id='port' name='port'>
+		Player Name: <input type='text' id='name' name='user name'>
+        <button type="button" id='cntBtn' onclick="connect();">Connect</button>
+		<!--<textarea id='log' name='log' readonly='readonly'></textarea><br/>-->
+		<!--<input type='text' id='message' name='message' />-->
+	</div>
+	
+	<p id="scores"> Player 1 Score: 0 | Player 2 Score: 0 | Player 3 Score: 0 | Player 4 Score: 0 </p>
+</body>
+
+</html>

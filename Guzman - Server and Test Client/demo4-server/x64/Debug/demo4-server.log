@@ -1,2 +1,8 @@
-﻿  main.cpp
-  demo4-server.vcxproj -> C:\Users\dghos\Documents\School\3rd Year, Winter\ICS 167\Homeworks\ICS 167 - Assignment 3\ICS-167-Assignment-3\Guzman - Server and Test Client\x64\Debug\demo4-server.exe
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(387,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (demo4-server.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  main.cpp
+  Generating Code...
+  Skipping... (no relevant changes detected)
+  websocket.cpp
+  sha1.cpp
+  base64.cpp
+  demo4-server.vcxproj -> C:\Users\dghos\Documents\School\3rd Year, Winter\ICS 167\Homeworks\ICS 167 - Assignment 3\ICS-167-Assignment-3\Guzman - Server and Test Client\x64\Debug\server47844826.exe
